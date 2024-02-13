@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: project-controller
 repo: github.com/konflux-ci/project-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: konflux.dev
+  group: projctl
+  kind: ProjectDevelopmentStream
+  path: github.com/konflux-ci/project-controller/api/v1beta1
+  version: v1beta1
 version: "3"

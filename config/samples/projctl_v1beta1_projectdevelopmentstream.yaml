@@ -1,0 +1,12 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  labels:
+    app.kubernetes.io/name: projectdevelopmentstream
+    app.kubernetes.io/instance: projectdevelopmentstream-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: projectdevelopmentstream-sample
+spec:
+  # TODO(user): Add fields here
