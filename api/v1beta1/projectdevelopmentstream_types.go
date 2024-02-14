@@ -18,18 +18,25 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// +kubebuilder:pruning:PreserveUnknownFields
+type UnstructuredObj struct {
+	unstructured.Unstructured `json:",inline"`
+}
 
 // ProjectDevelopmentStreamSpec defines the desired state of ProjectDevelopmentStream
 type ProjectDevelopmentStreamSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of ProjectDevelopmentStream. Edit projectdevelopmentstream_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The name of the project this stream belongs to
+	Project   string            `json:"project,omitempty"`
+	Resources []UnstructuredObj `json:"resources,omitempty"`
 }
 
 // ProjectDevelopmentStreamStatus defines the observed state of ProjectDevelopmentStream

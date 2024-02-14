@@ -50,6 +50,41 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	_ = log.FromContext(ctx)
 
 	// TODO(user): your logic here
+	log := log.FromContext(ctx)
+
+	var pds projctlv1beta1.ProjectDevelopmentStream
+	if err := r.Get(ctx, req.NamespacedName, &pds); err != nil {
+		log.Error(err, "Unable to fetch ProjectDevelopmentStream")
+		// we'll ignore not-found errors, since they can't be fixed by an immediate
+		// requeue (we'll need to wait for a new notification), and we can get them
+		// on deleted requests.
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	log = log.WithValues("PDS name", pds.ObjectMeta.Name)
+	log.Info("Applying resources from ProjectDevelopmentStream")
+
+	for _, resourceTemplate := range pds.Spec.Resources {
+		resource := resourceTemplate.DeepCopy()
+		log := log.WithValues(
+			"apiVersion", resource.GetAPIVersion(),
+			"kind", resource.GetKind(),
+			"name", resource.GetName(),
+		)
+		log.Info("Creating resource")
+		if resource.GetNamespace() != "" && resource.GetNamespace() != pds.GetNamespace() {
+			log.Info(
+				"Resource namespace set to ProjectDevelopmentStream namespace",
+				"PDS namespace", pds.GetNamespace(),
+				"resource original namespace", resource.GetNamespace(),
+			)
+		}
+		resource.SetNamespace(pds.GetNamespace())
+
+		if err := r.Client.Create(ctx, resource); err != nil {
+			log.Error(err, "Failed to create resource")
+		}
+	}
 
 	return ctrl.Result{}, nil
 }

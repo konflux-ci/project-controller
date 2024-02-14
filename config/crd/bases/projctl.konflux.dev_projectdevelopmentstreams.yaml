@@ -1,0 +1,61 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: projectdevelopmentstreams.projctl.konflux.dev
+spec:
+  group: projctl.konflux.dev
+  names:
+    kind: ProjectDevelopmentStream
+    listKind: ProjectDevelopmentStreamList
+    plural: projectdevelopmentstreams
+    singular: projectdevelopmentstream
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ProjectDevelopmentStream is the Schema for the projectdevelopmentstreams
+          API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProjectDevelopmentStreamSpec defines the desired state of
+              ProjectDevelopmentStream
+            properties:
+              project:
+                description: The name of the project this stream belongs to
+                type: string
+              resources:
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+            type: object
+          status:
+            description: ProjectDevelopmentStreamStatus defines the observed state
+              of ProjectDevelopmentStream
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
