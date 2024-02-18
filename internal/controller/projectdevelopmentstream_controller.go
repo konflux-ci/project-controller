@@ -19,6 +19,9 @@ package controller
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/equality"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -64,6 +67,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	log = log.WithValues("PDS name", pds.ObjectMeta.Name)
 	log.Info("Applying resources from ProjectDevelopmentStream")
 
+	ctrlResult := ctrl.Result{}
 	for _, resourceTemplate := range pds.Spec.Resources {
 		resource := resourceTemplate.DeepCopy()
 		log := log.WithValues(
@@ -71,7 +75,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			"kind", resource.GetKind(),
 			"name", resource.GetName(),
 		)
-		log.Info("Creating resource")
+		log.Info("Creating/Updating resource")
 		if resource.GetNamespace() != "" && resource.GetNamespace() != pds.GetNamespace() {
 			log.Info(
 				"Resource namespace set to ProjectDevelopmentStream namespace",
@@ -81,12 +85,40 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		}
 		resource.SetNamespace(pds.GetNamespace())
 
-		if err := r.Client.Create(ctx, resource); err != nil {
-			log.Error(err, "Failed to create resource")
+		var existing unstructured.Unstructured
+		existing.SetAPIVersion(resource.GetAPIVersion())
+		existing.SetKind(resource.GetKind())
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Info("Creating new resource")
+				if err := r.Client.Create(ctx, resource); err != nil {
+					log.Error(err, "Failed to create resource")
+				}
+			} else {
+				log.Error(err, "Failed to read existing resource")
+			}
+			continue
 		}
+		update := existing.DeepCopy()
+		if m, ok, _ := unstructured.NestedMap(resource.Object, "spec"); ok {
+			if err := unstructured.SetNestedMap(update.Object, m, "spec"); err != nil {
+				log.Error(err, "Failed to update 'spec' for generated resource")
+			}
+		}
+		if equality.Semantic.DeepEqual(existing.Object, update.Object) {
+			log.Info("Resource already up to date")
+			continue
+		}
+		if err := r.Client.Update(ctx, update); err != nil {
+			log.Error(err, "Failed to update resource")
+			if apierrors.IsConflict(err) {
+				ctrlResult = ctrl.Result{Requeue: true}
+			}
+		}
+		log.Info("Resource updated")
 	}
 
-	return ctrl.Result{}, nil
+	return ctrlResult, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

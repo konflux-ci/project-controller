@@ -33,5 +33,5 @@ spec:
         git:
           context: "{cool-comp1-context}"
           dockerfileUrl: "{cool-comp1-dockerfileUrl}"
-          revision: "{cool-comp1-revision}-foo"
+          revision: "{cool-comp1-revision}"
           url: git@github.com:example/comp1.git

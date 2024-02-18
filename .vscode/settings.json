@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "apierrors",
         "apimachinery",
         "clientgoscheme",
         "finalizers",
