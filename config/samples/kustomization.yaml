@@ -1,4 +1,5 @@
 ## Append samples of your project ##
 resources:
 - projctl_v1beta1_projectdevelopmentstream.yaml
+- projctl_v1beta1_project.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
