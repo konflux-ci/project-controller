@@ -3,6 +3,7 @@
         "apierrors",
         "apimachinery",
         "clientgoscheme",
+        "controllerutil",
         "finalizers",
         "healthz",
         "konflux",
