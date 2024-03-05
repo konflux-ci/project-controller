@@ -1,0 +1,89 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: projectdevelopmentstreamtemplates.projctl.konflux.dev
+spec:
+  group: projctl.konflux.dev
+  names:
+    kind: ProjectDevelopmentStreamTemplate
+    listKind: ProjectDevelopmentStreamTemplateList
+    plural: projectdevelopmentstreamtemplates
+    singular: projectdevelopmentstreamtemplate
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ProjectDevelopmentStreamTemplate is the Schema for the projectdevelopmentstreamtemplates
+          API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              ProjectDevelopmentStreamTemplateSpec defines the resources to be generated
+              using a ProjectDevelopmentStreamTemplate
+            properties:
+              project:
+                description: The name of the project this stream template belongs
+                  to
+                type: string
+              resources:
+                description: |-
+                  List of resources to be created for version made from this template
+                  certain values for resource properties may include references to
+                  variables using the Go-text/template syntax
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              variables:
+                description: |-
+                  List of variables to allow customizing the template results. The order
+                  variables in the list is significant as earlier variables can be
+                  referenced by the default values for later variables
+                items:
+                  description: Settings for a variable to be used to customize the
+                    template results
+                  properties:
+                    default:
+                      description: |-
+                        Optional default value for use when a value for the variable is not given
+                        can reference values of other previously defined variables using the Go
+                        text/template syntax
+                      type: string
+                    description:
+                      description: Optional description for the variable for display
+                        in the UI
+                      type: string
+                    name:
+                      description: Variable name
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
