@@ -1,0 +1,37 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  labels:
+    app.kubernetes.io/name: projectdevelopmentstream
+    app.kubernetes.io/instance: projectdevelopmentstream-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: projectdevelopmentstream-sample
+spec:
+  project: sample-project
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-version1"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-app1-main
+    spec:
+      displayName: "Cool App version1"
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp1-version1"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-comp1-main
+    spec:
+      application: "cool-app-version1"
+      componentName: "cool-comp1-version1"
+      source:
+        git:
+          context: "{cool-comp1-context}"
+          dockerfileUrl: "{cool-comp1-dockerfileUrl}"
+          revision: "{cool-comp1-revision}"
+          url: git@github.com:example/comp1.git

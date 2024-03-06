@@ -1,0 +1,20 @@
+{
+    "cSpell.words": [
+        "apierrors",
+        "apimachinery",
+        "clientgoscheme",
+        "finalizers",
+        "healthz",
+        "konflux",
+        "kubebuilder",
+        "metav",
+        "metricsserver",
+        "OIDC",
+        "projctl",
+        "projctlv",
+        "projectdevelopmentstream",
+        "projectdevelopmentstreams",
+        "subresource",
+        "utilruntime"
+    ]
+}
