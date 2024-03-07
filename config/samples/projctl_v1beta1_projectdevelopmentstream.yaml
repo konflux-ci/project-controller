@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: project-controller
   name: projectdevelopmentstream-sample
 spec:
-  project: sample-project
+  project: project-sample
   resources:
   - apiVersion: appstudio.redhat.com/v1alpha1
     kind: Application

@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
@@ -65,6 +66,22 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	log = log.WithValues("PDS name", pds.ObjectMeta.Name)
+
+	// This is arguably better done in an admission hook, but its easier to test
+	// when doing this from the controller
+	if !r.checkProductOwnerRef(pds) {
+		log.Info("Setting ownerReference for ProductDevelopmentStream")
+		if err := r.setProductOwnerRef(ctx, &pds); err != nil {
+			log.Error(err, "Error setting product ownerReference for ProjectDevelopmentStream")
+			// We treat the product association as a light requirement so we
+			// continue to applying templates rather then quitting on error here
+		} else {
+			// Since we modified the PDS object exit so another reconciliation
+			// run can start
+			return ctrl.Result{}, nil
+		}
+	}
+
 	log.Info("Applying resources from ProjectDevelopmentStream")
 
 	ctrlResult := ctrl.Result{}
@@ -119,6 +136,35 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	return ctrlResult, nil
+}
+
+// Check wither the PDS ownerReference is already set to point to the right
+// product
+func (r *ProjectDevelopmentStreamReconciler) checkProductOwnerRef(pds projctlv1beta1.ProjectDevelopmentStream) bool {
+	projectName := pds.Spec.Project
+	if projectName == "" {
+		return true // We define an empty project field as having a reference
+	}
+	projectGVK, _ := r.Client.GroupVersionKindFor(&projctlv1beta1.Project{})
+	prjAPIVersion, prjKind := projectGVK.ToAPIVersionAndKind()
+	for _, ref := range pds.ObjectMeta.OwnerReferences {
+		if ref.APIVersion == prjAPIVersion && ref.Kind == prjKind && ref.Name == projectName {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *ProjectDevelopmentStreamReconciler) setProductOwnerRef(ctx context.Context, pds *projctlv1beta1.ProjectDevelopmentStream) error {
+	projectKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: pds.Spec.Project}
+	project := projctlv1beta1.Project{}
+	if err := r.Client.Get(ctx, projectKey, &project); err != nil {
+		return err
+	}
+	if err := controllerutil.SetOwnerReference(&project, pds, r.Scheme); err != nil {
+		return err
+	}
+	return r.Client.Update(ctx, pds)
 }
 
 // SetupWithManager sets up the controller with the Manager.

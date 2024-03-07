@@ -1,0 +1,14 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: Project
+metadata:
+  labels:
+    app.kubernetes.io/name: project
+    app.kubernetes.io/instance: project-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: project-sample
+spec:
+  displayName: "API demonstration sample project"
+  description: |
+    A sample project to demonstrate how to use the projects API.
