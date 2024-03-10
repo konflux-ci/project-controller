@@ -30,6 +30,7 @@ import (
 
 	"github.com/go-logr/logr"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/internal/template"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
@@ -84,24 +85,16 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	log.Info("Applying resources from ProjectDevelopmentStream")
+	resources, _ := template.MkResources(pds)
 
 	var requeue bool
-	for _, resourceTemplate := range pds.Spec.Resources {
-		resource := resourceTemplate.DeepCopy()
+	for _, resource := range resources {
 		log := log.WithValues(
 			"apiVersion", resource.GetAPIVersion(),
 			"kind", resource.GetKind(),
 			"name", resource.GetName(),
 		)
 		log.Info("Creating/Updating resource")
-		if resource.GetNamespace() != "" && resource.GetNamespace() != pds.GetNamespace() {
-			log.Info(
-				"Resource namespace set to ProjectDevelopmentStream namespace",
-				"PDS namespace", pds.GetNamespace(),
-				"resource original namespace", resource.GetNamespace(),
-			)
-		}
-		resource.SetNamespace(pds.GetNamespace())
 
 		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
 	}
@@ -109,7 +102,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	return ctrl.Result{Requeue: requeue}, nil
 }
 
-func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *projctlv1beta1.UnstructuredObj) (isUpdateConflict bool) {
+func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) (isUpdateConflict bool) {
 	var existing unstructured.Unstructured
 	existing.SetAPIVersion(resource.GetAPIVersion())
 	existing.SetKind(resource.GetKind())
