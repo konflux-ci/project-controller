@@ -8,6 +8,7 @@
         "healthz",
         "konflux",
         "kubebuilder",
+        "logr",
         "metav",
         "metricsserver",
         "OIDC",

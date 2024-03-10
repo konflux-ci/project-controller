@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 )
 
@@ -84,7 +85,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 
 	log.Info("Applying resources from ProjectDevelopmentStream")
 
-	ctrlResult := ctrl.Result{}
+	var requeue bool
 	for _, resourceTemplate := range pds.Spec.Resources {
 		resource := resourceTemplate.DeepCopy()
 		log := log.WithValues(
@@ -102,40 +103,44 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		}
 		resource.SetNamespace(pds.GetNamespace())
 
-		var existing unstructured.Unstructured
-		existing.SetAPIVersion(resource.GetAPIVersion())
-		existing.SetKind(resource.GetKind())
-		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
-			if apierrors.IsNotFound(err) {
-				log.Info("Creating new resource")
-				if err := r.Client.Create(ctx, resource); err != nil {
-					log.Error(err, "Failed to create resource")
-				}
-			} else {
-				log.Error(err, "Failed to read existing resource")
-			}
-			continue
-		}
-		update := existing.DeepCopy()
-		if m, ok, _ := unstructured.NestedMap(resource.Object, "spec"); ok {
-			if err := unstructured.SetNestedMap(update.Object, m, "spec"); err != nil {
-				log.Error(err, "Failed to update 'spec' for generated resource")
-			}
-		}
-		if equality.Semantic.DeepEqual(existing.Object, update.Object) {
-			log.Info("Resource already up to date")
-			continue
-		}
-		if err := r.Client.Update(ctx, update); err != nil {
-			log.Error(err, "Failed to update resource")
-			if apierrors.IsConflict(err) {
-				ctrlResult = ctrl.Result{Requeue: true}
-			}
-		}
-		log.Info("Resource updated")
+		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
 	}
 
-	return ctrlResult, nil
+	return ctrl.Result{Requeue: requeue}, nil
+}
+
+func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *projctlv1beta1.UnstructuredObj) (isUpdateConflict bool) {
+	var existing unstructured.Unstructured
+	existing.SetAPIVersion(resource.GetAPIVersion())
+	existing.SetKind(resource.GetKind())
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
+		if apierrors.IsNotFound(err) {
+			log.Info("Creating new resource")
+			if err := r.Client.Create(ctx, resource); err != nil {
+				log.Error(err, "Failed to create resource")
+			}
+		} else {
+			log.Error(err, "Failed to read existing resource")
+		}
+		return
+	}
+	update := existing.DeepCopy()
+	if m, ok, _ := unstructured.NestedMap(resource.Object, "spec"); ok {
+		if err := unstructured.SetNestedMap(update.Object, m, "spec"); err != nil {
+			log.Error(err, "Failed to update 'spec' for generated resource")
+		}
+	}
+	if equality.Semantic.DeepEqual(existing.Object, update.Object) {
+		log.Info("Resource already up to date")
+		return
+	}
+	if err := r.Client.Update(ctx, update); err != nil {
+		log.Error(err, "Failed to update resource")
+		isUpdateConflict = apierrors.IsConflict(err)
+		return
+	}
+	log.Info("Resource updated")
+	return
 }
 
 // Check wither the PDS ownerReference is already set to point to the right
