@@ -1,0 +1,77 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  labels:
+    app.kubernetes.io/name: projectdevelopmentstreamtemplate
+    app.kubernetes.io/instance: projectdevelopmentstreamtemplate-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: projectdevelopmentstreamtemplate-sample
+spec:
+  project: project-sample
+  variables:
+  - name: version
+    description: A version number for the new development stream
+
+  - name: cool-comp1-context
+    defaultValue: ./
+    description: Context directory for cool-comp1 component
+  - name: cool-comp1-dockerfileUrl
+    defaultValue: Dockerfile
+    description: Dockerfile location for cool-comp1 component
+  - name: cool-comp1-revision
+    defaultValue: "{version}"
+    description: Git revision for cool-comp1 component
+
+  - name: cool-comp2-context
+    defaultValue: ./
+    description: Context directory for cool-comp2 component
+  - name: cool-comp2-dockerfileUrl
+    defaultValue: Dockerfile
+    description: Dockerfile location for cool-comp2 component
+  - name: cool-comp2-revision
+    defaultValue: fixed-rev
+    description: Git revision for cool-comp2 component
+
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-{version}"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-app1-main
+    spec:
+      displayName: "Cool App {version}"
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp1-{version}"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-comp1-main
+    spec:
+      application: "cool-app-{version}"
+      componentName: "cool-comp1-{version}"
+      source:
+        git:
+          context: "{cool-comp1-context}"
+          dockerfileUrl: "{cool-comp1-dockerfileUrl}"
+          revision: "{cool-comp1-revision}"
+          uri: git@github.com:example/comp1.git
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp2-{version}"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-comp2-main
+    spec:
+      application: "cool-app-{version}"
+      componentName: "cool-comp2-{version}"
+      source:
+        git:
+          context: "{cool-comp2-context}"
+          dockerfileUrl: "{cool-comp2-dockerfileUrl}"
+          revision: "{cool-comp2-revision}"
+          uri: git@github.com:example/comp2.git
