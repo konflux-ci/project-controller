@@ -18,31 +18,47 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// +kubebuilder:pruning:PreserveUnknownFields
-type UnstructuredObj struct {
-	unstructured.Unstructured `json:",inline"`
+// Provide a value for a variable specified in an associated
+// ProjectDevelopmentStreamTemplate
+type ProjectDevelopmentStreamSpecTemplateValue struct {
+	// The name of the template variable to provide a value for
+	Name string `json:"name"`
+	// The value to be placed in the template variable
+	Value string `json:"value"`
+}
+
+// ProjectDevelopmentStreamSpecTemplateRef defines which optional template is
+// associated with this ProjectDevelopmentStream and how to apply it
+type ProjectDevelopmentStreamSpecTemplateRef struct {
+	// The name of the ProjectDevelopmentStreamTemplate to use
+	Name string `json:"name"`
+	// Values for template variables
+	Values []ProjectDevelopmentStreamSpecTemplateValue `json:"values,omitempty"`
 }
 
 // ProjectDevelopmentStreamSpec defines the desired state of ProjectDevelopmentStream
 type ProjectDevelopmentStreamSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	// The name of the project this stream belongs to
-	Project   string            `json:"project,omitempty"`
-	Resources []UnstructuredObj `json:"resources,omitempty"`
+	Project string `json:"project,omitempty"`
+	// An optional template to use for creating resources owned by this
+	// ProjectDevelopmentStream
+	Template *ProjectDevelopmentStreamSpecTemplateRef `json:"template,omitempty"`
 }
 
 // ProjectDevelopmentStreamStatus defines the observed state of ProjectDevelopmentStream
 type ProjectDevelopmentStreamStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Represents the observations of a ProjectDevelopmentStream's current state.
+	// Known .status.conditions.type are: "TemplateApplied", and "TemplateGenerated"
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 //+kubebuilder:object:root=true

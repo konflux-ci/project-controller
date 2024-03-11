@@ -58,7 +58,7 @@ spec:
           context: "{cool-comp1-context}"
           dockerfileUrl: "{cool-comp1-dockerfileUrl}"
           revision: "{cool-comp1-revision}"
-          uri: git@github.com:example/comp1.git
+          url: git@github.com:example/comp1.git
 
   - apiVersion: appstudio.redhat.com/v1alpha1
     kind: Component
@@ -74,4 +74,4 @@ spec:
           context: "{cool-comp2-context}"
           dockerfileUrl: "{cool-comp2-dockerfileUrl}"
           revision: "{cool-comp2-revision}"
-          uri: git@github.com:example/comp2.git
+          url: git@github.com:example/comp2.git

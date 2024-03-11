@@ -84,8 +84,23 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		}
 	}
 
-	log.Info("Applying resources from ProjectDevelopmentStream")
-	resources, _ := template.MkResources(pds)
+	var templateName string
+	if pds.Spec.Template == nil {
+		log.Info("No template is associated with this ProjectDevelopmentStream")
+		return ctrl.Result{}, nil
+	}
+	templateName = pds.Spec.Template.Name
+	log = log.WithValues("PDS Template", templateName)
+
+	var pdst projctlv1beta1.ProjectDevelopmentStreamTemplate
+	templateKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: templateName}
+	if err := r.Get(ctx, templateKey, &pdst); err != nil {
+		log.Error(err, "Failed to fetch template")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	log.Info("Applying resources from ProjectDevelopmentStreamTemplate")
+	resources, _ := template.MkResources(pds, pdst)
 
 	var requeue bool
 	for _, resource := range resources {

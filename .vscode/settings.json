@@ -12,6 +12,7 @@
         "metav",
         "metricsserver",
         "OIDC",
+        "pdst",
         "projctl",
         "projctlv",
         "projectdevelopmentstream",

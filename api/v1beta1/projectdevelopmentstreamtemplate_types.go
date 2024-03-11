@@ -18,10 +18,16 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// +kubebuilder:pruning:PreserveUnknownFields
+
+type UnstructuredObj struct {
+	unstructured.Unstructured `json:",inline"`
+}
 
 // Settings for a variable to be used to customize the template results
 type ProjectDevelopmentStreamTemplateVariable struct {

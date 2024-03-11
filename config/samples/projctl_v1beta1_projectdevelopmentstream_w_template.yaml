@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/part-of: project-controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: project-controller
-  name: projectdevelopmentstream-sample-plain
+  name: projectdevelopmentstream-sample-w-template
 spec:
   project: project-sample
+  template:
+    name: projectdevelopmentstreamtemplate-sample-no-vars
