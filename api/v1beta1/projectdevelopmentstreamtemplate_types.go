@@ -36,7 +36,7 @@ type ProjectDevelopmentStreamTemplateVariable struct {
 	// Optional default value for use when a value for the variable is not given
 	// can reference values of other previously defined variables using the Go
 	// text/template syntax
-	Default *string `json:"default,omitempty"`
+	DefaultValue *string `json:"defaultValue,omitempty"`
 	// Optional description for the variable for display in the UI
 	Description string `json:"description,omitempty"`
 }

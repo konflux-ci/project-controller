@@ -1,19 +1,211 @@
 package template
 
 import (
+	"fmt"
+	"regexp"
+	"slices"
+	"strings"
+	"text/template"
+
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	apischema "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// List of resource types supported by templates and various details about how
+// to instantiate resources of those types. The list order determines the order
+// in which resources are created, which can be significant for e.g. creating
+// ownership relationships
+var supportedResourceTypes = []struct {
+	// The supported API group/version/kind values for this resource.
+	supportedAPIs []apischema.GroupVersionKind
+	// The list of template-able fields for the resource. Each member is a list
+	// of strings indicating the full path to the field
+	templateAbleFields [][]string
+	// Like templateAbleFields but for fields that contain k8s resource names.
+	// For such fields an error will be reported if the generated value does not
+	// match ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+	templateAbleNameFields [][]string
+}{
+	{
+		supportedAPIs: []apischema.GroupVersionKind{
+			{Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application"},
+		},
+		templateAbleNameFields: [][]string{
+			{"metadata", "name"},
+		},
+		templateAbleFields: [][]string{
+			{"spec", "displayName"},
+		},
+	},
+	{
+		supportedAPIs: []apischema.GroupVersionKind{
+			{Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Component"},
+		},
+		templateAbleNameFields: [][]string{
+			{"metadata", "name"},
+			{"spec", "application"},
+			{"spec", "componentName"},
+		},
+		templateAbleFields: [][]string{
+			{"spec", "source", "git", "context"},
+			{"spec", "source", "git", "dockerfileUrl"},
+			{"spec", "source", "git", "revision"},
+			{"spec", "source", "git", "url"},
+		},
+	},
+}
+
+// Make the resources to be owned by the given ProjectDevelopmentStream as
+// defined by the given  ProjectDevelopmentStreamTemplate
 func MkResources(
 	pds projctlv1beta1.ProjectDevelopmentStream,
 	pdst projctlv1beta1.ProjectDevelopmentStreamTemplate,
 ) ([]*unstructured.Unstructured, error) {
 	resources := make([]*unstructured.Unstructured, 0, len(pdst.Spec.Resources))
-	for _, unstructuredObj := range pdst.Spec.Resources {
-		resource := unstructuredObj.Unstructured.DeepCopy()
-		resource.SetNamespace(pds.GetNamespace())
-		resources = append(resources, resource)
+	// unhandledTemplates is used to detect unsupported resource types that may
+	// have been included in the template
+	unhandledTemplates := make(map[int]bool, len(pdst.Spec.Resources))
+	for i := range pdst.Spec.Resources {
+		unhandledTemplates[i] = true
+	}
+	templateVarValues, err := getVarValues(pdst.Spec.Variables, pds.Spec.Template.Values)
+	if err != nil {
+		return nil, err
+	}
+	for _, srt := range supportedResourceTypes {
+		for i, unstructuredObj := range pdst.Spec.Resources {
+			if slices.Index(srt.supportedAPIs, unstructuredObj.GroupVersionKind()) < 0 {
+				continue
+			}
+			unhandledTemplates[i] = false
+			resource := unstructuredObj.Unstructured.DeepCopy()
+			resource.SetNamespace(pds.GetNamespace())
+			if err := applyResourceTemplate(resource, srt.templateAbleNameFields, templateVarValues); err != nil {
+				return nil, err
+			}
+			if err := validateResourceNameFields(resource, srt.templateAbleNameFields); err != nil {
+				return nil, err
+			}
+			if err := applyResourceTemplate(resource, srt.templateAbleFields, templateVarValues); err != nil {
+				return nil, err
+			}
+			resources = append(resources, resource)
+		}
+	}
+	for i, unstructuredObj := range pdst.Spec.Resources {
+		if unhandledTemplates[i] {
+			return nil, fmt.Errorf(
+				"Unsupported resource type in template: %s",
+				unstructuredObj.GroupVersionKind(),
+			)
+		}
 	}
 	return resources, nil
+}
+
+// Given a resource, a list of template-able fields and template variable values,
+// treat the fields as text/template templates and execute them generating new
+// values for said fields
+func applyResourceTemplate(
+	resource *unstructured.Unstructured,
+	templateAbleFields [][]string,
+	templateVarValues map[string]string,
+) error {
+	for _, path := range templateAbleFields {
+		valueTemplate, ok, err := unstructured.NestedString(resource.Object, path...)
+		if err != nil {
+			return fmt.Errorf("Error reading resource template: %s", err)
+		}
+		if !ok {
+			continue
+		}
+		value, err := executeTemplate(valueTemplate, templateVarValues)
+		if err != nil {
+			return fmt.Errorf("Error applying resource template: %s", err)
+		}
+		err = unstructured.SetNestedField(resource.Object, value, path...)
+		if err != nil {
+			return fmt.Errorf("Error applying resource template: %s", err)
+		}
+	}
+	return nil
+}
+
+var nameFieldPattern = regexp.MustCompile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")
+
+// Given a resource and a list of field paths, check that the value in those
+// paths conform to the k8s resource name rules and return a non-nil error if
+// then don't.
+func validateResourceNameFields(
+	resource *unstructured.Unstructured,
+	nameFields [][]string,
+) error {
+	for _, path := range nameFields {
+		value, ok, err := unstructured.NestedString(resource.Object, path...)
+		if err != nil || !ok {
+			// We just ignore field reading errors, we'll deal with them elsewhere
+			continue
+		}
+		if !nameFieldPattern.MatchString(value) {
+			return fmt.Errorf(
+				"Invalid resource name value '%s' for resource field '%s'. "+
+					"Consider using the 'hyphenize' template function",
+				value,
+				strings.Join(path, "."),
+			)
+		}
+	}
+	return nil
+}
+
+// Get the values for the given template variables using the given values or
+// the defaults if values ar missing
+func getVarValues(
+	vars []projctlv1beta1.ProjectDevelopmentStreamTemplateVariable,
+	vals []projctlv1beta1.ProjectDevelopmentStreamSpecTemplateValue,
+) (values map[string]string, err error) {
+	values = map[string]string{}
+	givenValues := map[string]string{}
+	for _, val := range vals {
+		givenValues[val.Name] = val.Value
+	}
+	for _, variable := range vars {
+		if givenValue, ok := givenValues[variable.Name]; ok {
+			values[variable.Name] = givenValue
+		} else if variable.DefaultValue != nil {
+			var value string
+			if value, err = executeTemplate(*variable.DefaultValue, values); err != nil {
+				break
+			}
+			values[variable.Name] = value
+		} else {
+			err = fmt.Errorf(
+				"Template variable '%s' is missing a value and default not defined",
+				variable.Name,
+			)
+			break
+		}
+	}
+	return
+}
+
+var nameFieldInvalidCharPattern = regexp.MustCompile("[^a-z0-9]")
+var templateFuncs = template.FuncMap{
+	"hyphenize": func(str string) string {
+		return nameFieldInvalidCharPattern.ReplaceAllString(str, "-")
+	},
+}
+
+// Execute the template given as a string and return the result as a string
+func executeTemplate(templateStr string, values map[string]string) (string, error) {
+	theTemplate, err := template.New("").Funcs(templateFuncs).Parse(templateStr)
+	if err != nil {
+		return "", err
+	}
+	var valueBuf strings.Builder
+	if err := theTemplate.Execute(&valueBuf, values); err != nil {
+		return "", err
+	}
+	return valueBuf.String(), nil
 }

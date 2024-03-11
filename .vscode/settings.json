@@ -2,10 +2,12 @@
     "cSpell.words": [
         "apierrors",
         "apimachinery",
+        "apischema",
         "clientgoscheme",
         "controllerutil",
         "finalizers",
         "healthz",
+        "hyphenize",
         "konflux",
         "kubebuilder",
         "logr",
@@ -17,7 +19,10 @@
         "projctlv",
         "projectdevelopmentstream",
         "projectdevelopmentstreams",
+        "projectdevelopmentstreamtemplate",
+        "projectdevelopmentstreamtemplates",
         "subresource",
-        "utilruntime"
+        "utilruntime",
+        "vals"
     ]
 }

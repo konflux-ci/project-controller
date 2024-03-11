@@ -100,7 +100,13 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	log.Info("Applying resources from ProjectDevelopmentStreamTemplate")
-	resources, _ := template.MkResources(pds, pdst)
+	resources, err := template.MkResources(pds, pdst)
+	if err != nil {
+		log.Error(err, "Failed to generate resources from template")
+		// We return 'nil' error because there is not point retrying the
+		// reconcile loop
+		return ctrl.Result{}, nil
+	}
 
 	var requeue bool
 	for _, resource := range resources {

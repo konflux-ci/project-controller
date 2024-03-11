@@ -64,7 +64,7 @@ spec:
                   description: Settings for a variable to be used to customize the
                     template results
                   properties:
-                    default:
+                    defaultValue:
                       description: |-
                         Optional default value for use when a value for the variable is not given
                         can reference values of other previously defined variables using the Go
