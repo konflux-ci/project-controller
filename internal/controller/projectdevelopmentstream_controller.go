@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -30,6 +31,7 @@ import (
 
 	"github.com/go-logr/logr"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/internal/ownership"
 	"github.com/konflux-ci/project-controller/internal/template"
 )
 
@@ -116,13 +118,28 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			"name", resource.GetName(),
 		)
 		log.Info("Creating/Updating resource")
-
+		ownership.AddMissingUIDs(ctx, r.Client, resource)
+		if len(resource.GetOwnerReferences()) <= 0 {
+			// If the resource does not have an owner set, use the PDS
+			controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
+		}
 		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
 	}
 
 	return ctrl.Result{Requeue: requeue}, nil
 }
 
+// Which fields to update for resources from the templates
+var fieldsToUpdate = [][]string{
+	{"spec"},
+	{"metadata", "labels"},
+	{"metadata", "annotations"},
+	{"metadata", "ownerReferences"},
+}
+
+// Create or update the given resource. Returns true if there is an update
+// conflict for the resource and therefore the reconcile action should be
+// re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) (isUpdateConflict bool) {
 	var existing unstructured.Unstructured
 	existing.SetAPIVersion(resource.GetAPIVersion())
@@ -139,9 +156,15 @@ func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.
 		return
 	}
 	update := existing.DeepCopy()
-	if m, ok, _ := unstructured.NestedMap(resource.Object, "spec"); ok {
-		if err := unstructured.SetNestedMap(update.Object, m, "spec"); err != nil {
-			log.Error(err, "Failed to update 'spec' for generated resource")
+	for _, field := range fieldsToUpdate {
+		if v, ok, _ := unstructured.NestedFieldNoCopy(resource.Object, field...); ok {
+			if err := unstructured.SetNestedField(update.Object, v, field...); err != nil {
+				log.Error(
+					err,
+					"Failed to update field for generated resource",
+					"field", strings.Join(field, "."),
+				)
+			}
 		}
 	}
 	if equality.Semantic.DeepEqual(existing.Object, update.Object) {

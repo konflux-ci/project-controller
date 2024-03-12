@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/internal/ownership"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apischema "k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -26,6 +27,11 @@ var supportedResourceTypes = []struct {
 	// For such fields an error will be reported if the generated value does not
 	// match ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
 	templateAbleNameFields [][]string
+	// A field of the resource that points to its owner object. If nil, an
+	// owner record would not be set.
+	ownerNameField []string
+	// The owner object GVK. Will only be used if ownerNameField is not empty
+	ownerAPI apischema.GroupVersionKind
 }{
 	{
 		supportedAPIs: []apischema.GroupVersionKind{
@@ -52,6 +58,10 @@ var supportedResourceTypes = []struct {
 			{"spec", "source", "git", "dockerfileUrl"},
 			{"spec", "source", "git", "revision"},
 			{"spec", "source", "git", "url"},
+		},
+		ownerNameField: []string{"spec", "application"},
+		ownerAPI: apischema.GroupVersionKind{
+			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application",
 		},
 	},
 }
@@ -89,6 +99,14 @@ func MkResources(
 			}
 			if err := applyResourceTemplate(resource, srt.templateAbleFields, templateVarValues); err != nil {
 				return nil, err
+			}
+			if srt.ownerNameField != nil {
+				ownerName, ok, err := unstructured.NestedString(resource.Object, srt.ownerNameField...)
+				if ok && err == nil {
+					// If we can't find the owner name field, we just skip
+					// setting an owner
+					ownership.SetWithoutUid(resource, srt.ownerAPI, ownerName)
+				}
 			}
 			resources = append(resources, resource)
 		}
