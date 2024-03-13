@@ -121,7 +121,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		ownership.AddMissingUIDs(ctx, r.Client, resource)
 		if len(resource.GetOwnerReferences()) <= 0 {
 			// If the resource does not have an owner set, use the PDS
-			controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
+			_ = controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
 		}
 		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
 	}
@@ -140,7 +140,7 @@ var fieldsToUpdate = [][]string{
 // Create or update the given resource. Returns true if there is an update
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
-func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) (isUpdateConflict bool) {
+func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
 	var existing unstructured.Unstructured
 	existing.SetAPIVersion(resource.GetAPIVersion())
 	existing.SetKind(resource.GetKind())
@@ -153,7 +153,7 @@ func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.
 		} else {
 			log.Error(err, "Failed to read existing resource")
 		}
-		return
+		return false
 	}
 	update := existing.DeepCopy()
 	for _, field := range fieldsToUpdate {
@@ -169,15 +169,14 @@ func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.
 	}
 	if equality.Semantic.DeepEqual(existing.Object, update.Object) {
 		log.Info("Resource already up to date")
-		return
+		return false
 	}
 	if err := r.Client.Update(ctx, update); err != nil {
 		log.Error(err, "Failed to update resource")
-		isUpdateConflict = apierrors.IsConflict(err)
-		return
+		return apierrors.IsConflict(err)
 	}
 	log.Info("Resource updated")
-	return
+	return false
 }
 
 // Check wither the PDS ownerReference is already set to point to the right
