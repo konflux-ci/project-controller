@@ -10,7 +10,7 @@ Allow users to manage projects and development streams in Konflux
 - Starting a new development stream involves creating a large amount of
   *Application* and *Component* resources. This controller helps to streamline
   that by allowing to create a *ProjectDevelopmentStreamTemplate* resource
-  the specifies the resources to be created and allows for using variables to
+  that specifies the resources to be created and allows for using variables to
   customize them. Using a template, many similar development streams can be
   created quickly.
 
@@ -24,7 +24,7 @@ flowchart TD
     P(Project) -->|owns| PDS(ProjectDevelopmentStream)
     PDS -->|owns| A(Application)
     A -->|owns| C(Component)
-    PDS -..->|refrences| PDST
+    PDS -..->|references| PDST
     AT -..->|generates| A
     CT -..->|generates| C
 ```
@@ -106,7 +106,7 @@ spec:
 
 ### Create one or more ProjectDevelopmentStream resources
 
-*ProjectDevelopmentStream* resources may include an optional  `template` section
+*ProjectDevelopmentStream* resources may include an optional `template` section
 that references a *ProjectDevelopmentStreamTemplate* resource. That causes the
 resources defined by the template resource to be created. If the template
 defines any variables that lack default values, the values need to be provided
@@ -148,7 +148,7 @@ spec:
 ### What do we get
 
 Given the resources above, we end up with two *Application* resources, where
-each owns two *Component* resource so that each two components are using a
+each owns two *Component* resource so that each two components are using
 different branches of the `git@github.com:example/comp1.git` and
 `git@github.com:example/comp2.git` repositories respectively. The branch names
 are identical to the version numbers in this example. More complex relationships
