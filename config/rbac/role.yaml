@@ -5,6 +5,30 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - appstudio.redhat.com
+  resources:
+  - applications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - appstudio.redhat.com
+  resources:
+  - components
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - projctl.konflux.dev
   resources:
   - projectdevelopmentstreams
@@ -30,3 +54,19 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - projctl.konflux.dev
+  resources:
+  - projectdevelopmentstreamtemplates
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - projctl.konflux.dev
+  resources:
+  - projects
+  verbs:
+  - get
+  - list
+  - watch
