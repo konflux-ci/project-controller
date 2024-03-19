@@ -11,6 +11,7 @@ spec:
       containers:
       - name: kube-rbac-proxy
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           capabilities:
             drop:
@@ -33,6 +34,8 @@ spec:
             cpu: 5m
             memory: 64Mi
       - name: manager
+        securityContext:
+          readOnlyRootFilesystem: true
         args:
         - "--health-probe-bind-address=:8081"
         - "--metrics-bind-address=127.0.0.1:8080"
