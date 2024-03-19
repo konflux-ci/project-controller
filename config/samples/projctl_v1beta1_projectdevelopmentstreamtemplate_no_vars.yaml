@@ -1,0 +1,53 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  labels:
+    app.kubernetes.io/name: projectdevelopmentstreamtemplate
+    app.kubernetes.io/instance: projectdevelopmentstreamtemplate-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: projectdevelopmentstreamtemplate-sample-no-vars
+spec:
+  project: project-sample
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-no-vars"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-app1-main
+    spec:
+      displayName: "Cool App no-vars"
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp1-no-vars"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-comp1-main
+    spec:
+      application: "cool-app-no-vars"
+      componentName: "cool-comp1-no-vars"
+      source:
+        git:
+          context: "[cool-comp1-context]"
+          dockerfileUrl: "[cool-comp1-dockerfileUrl]"
+          revision: "[cool-comp1-revision]"
+          url: git@github.com:example/comp1.git
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp2-no-vars"
+      annotations:
+        pvc.konflux.dev/cloned-from: cool-comp2-main
+    spec:
+      application: "cool-app-no-vars"
+      componentName: "cool-comp2-no-vars"
+      source:
+        git:
+          context: "[cool-comp2-context]"
+          dockerfileUrl: "[cool-comp2-dockerfileUrl]"
+          revision: "[cool-comp2-revision]"
+          url: git@github.com:example/comp2.git

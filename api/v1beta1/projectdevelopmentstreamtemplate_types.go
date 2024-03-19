@@ -18,10 +18,16 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// +kubebuilder:pruning:PreserveUnknownFields
+
+type UnstructuredObj struct {
+	unstructured.Unstructured `json:",inline"`
+}
 
 // Settings for a variable to be used to customize the template results
 type ProjectDevelopmentStreamTemplateVariable struct {
@@ -30,7 +36,7 @@ type ProjectDevelopmentStreamTemplateVariable struct {
 	// Optional default value for use when a value for the variable is not given
 	// can reference values of other previously defined variables using the Go
 	// text/template syntax
-	Default *string `json:"default,omitempty"`
+	DefaultValue *string `json:"defaultValue,omitempty"`
 	// Optional description for the variable for display in the UI
 	Description string `json:"description,omitempty"`
 }

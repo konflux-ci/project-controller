@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,7 +29,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/internal/ownership"
+	"github.com/konflux-ci/project-controller/internal/template"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
@@ -82,60 +86,97 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		}
 	}
 
-	log.Info("Applying resources from ProjectDevelopmentStream")
+	var templateName string
+	if pds.Spec.Template == nil {
+		log.Info("No template is associated with this ProjectDevelopmentStream")
+		return ctrl.Result{}, nil
+	}
+	templateName = pds.Spec.Template.Name
+	log = log.WithValues("PDS Template", templateName)
 
-	ctrlResult := ctrl.Result{}
-	for _, resourceTemplate := range pds.Spec.Resources {
-		resource := resourceTemplate.DeepCopy()
+	var pdst projctlv1beta1.ProjectDevelopmentStreamTemplate
+	templateKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: templateName}
+	if err := r.Get(ctx, templateKey, &pdst); err != nil {
+		log.Error(err, "Failed to fetch template")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	log.Info("Applying resources from ProjectDevelopmentStreamTemplate")
+	resources, err := template.MkResources(pds, pdst)
+	if err != nil {
+		log.Error(err, "Failed to generate resources from template")
+		// We return 'nil' error because there is not point retrying the
+		// reconcile loop
+		return ctrl.Result{}, nil
+	}
+
+	var requeue bool
+	for _, resource := range resources {
 		log := log.WithValues(
 			"apiVersion", resource.GetAPIVersion(),
 			"kind", resource.GetKind(),
 			"name", resource.GetName(),
 		)
 		log.Info("Creating/Updating resource")
-		if resource.GetNamespace() != "" && resource.GetNamespace() != pds.GetNamespace() {
-			log.Info(
-				"Resource namespace set to ProjectDevelopmentStream namespace",
-				"PDS namespace", pds.GetNamespace(),
-				"resource original namespace", resource.GetNamespace(),
-			)
+		ownership.AddMissingUIDs(ctx, r.Client, resource)
+		if len(resource.GetOwnerReferences()) <= 0 {
+			// If the resource does not have an owner set, use the PDS
+			_ = controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
 		}
-		resource.SetNamespace(pds.GetNamespace())
-
-		var existing unstructured.Unstructured
-		existing.SetAPIVersion(resource.GetAPIVersion())
-		existing.SetKind(resource.GetKind())
-		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
-			if apierrors.IsNotFound(err) {
-				log.Info("Creating new resource")
-				if err := r.Client.Create(ctx, resource); err != nil {
-					log.Error(err, "Failed to create resource")
-				}
-			} else {
-				log.Error(err, "Failed to read existing resource")
-			}
-			continue
-		}
-		update := existing.DeepCopy()
-		if m, ok, _ := unstructured.NestedMap(resource.Object, "spec"); ok {
-			if err := unstructured.SetNestedMap(update.Object, m, "spec"); err != nil {
-				log.Error(err, "Failed to update 'spec' for generated resource")
-			}
-		}
-		if equality.Semantic.DeepEqual(existing.Object, update.Object) {
-			log.Info("Resource already up to date")
-			continue
-		}
-		if err := r.Client.Update(ctx, update); err != nil {
-			log.Error(err, "Failed to update resource")
-			if apierrors.IsConflict(err) {
-				ctrlResult = ctrl.Result{Requeue: true}
-			}
-		}
-		log.Info("Resource updated")
+		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
 	}
 
-	return ctrlResult, nil
+	return ctrl.Result{Requeue: requeue}, nil
+}
+
+// Which fields to update for resources from the templates
+var fieldsToUpdate = [][]string{
+	{"spec"},
+	{"metadata", "labels"},
+	{"metadata", "annotations"},
+	{"metadata", "ownerReferences"},
+}
+
+// Create or update the given resource. Returns true if there is an update
+// conflict for the resource and therefore the reconcile action should be
+// re-queued.
+func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
+	var existing unstructured.Unstructured
+	existing.SetAPIVersion(resource.GetAPIVersion())
+	existing.SetKind(resource.GetKind())
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
+		if apierrors.IsNotFound(err) {
+			log.Info("Creating new resource")
+			if err := r.Client.Create(ctx, resource); err != nil {
+				log.Error(err, "Failed to create resource")
+			}
+		} else {
+			log.Error(err, "Failed to read existing resource")
+		}
+		return false
+	}
+	update := existing.DeepCopy()
+	for _, field := range fieldsToUpdate {
+		if v, ok, _ := unstructured.NestedFieldNoCopy(resource.Object, field...); ok {
+			if err := unstructured.SetNestedField(update.Object, v, field...); err != nil {
+				log.Error(
+					err,
+					"Failed to update field for generated resource",
+					"field", strings.Join(field, "."),
+				)
+			}
+		}
+	}
+	if equality.Semantic.DeepEqual(existing.Object, update.Object) {
+		log.Info("Resource already up to date")
+		return false
+	}
+	if err := r.Client.Update(ctx, update); err != nil {
+		log.Error(err, "Failed to update resource")
+		return apierrors.IsConflict(err)
+	}
+	log.Info("Resource updated")
+	return false
 }
 
 // Check wither the PDS ownerReference is already set to point to the right
