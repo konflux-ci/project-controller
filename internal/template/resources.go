@@ -3,7 +3,6 @@ package template
 import (
 	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 	"text/template"
 
@@ -88,7 +87,7 @@ func MkResources(
 	}
 	for _, srt := range supportedResourceTypes {
 		for i, unstructuredObj := range pdst.Spec.Resources {
-			if slices.Index(srt.supportedAPIs, unstructuredObj.GroupVersionKind()) < 0 {
+			if !findGVK(srt.supportedAPIs, unstructuredObj.GroupVersionKind()) {
 				continue
 			}
 			unhandledTemplates[i] = false
@@ -123,6 +122,15 @@ func MkResources(
 		}
 	}
 	return resources, nil
+}
+
+func findGVK(GVKs []apischema.GroupVersionKind, someGVK apischema.GroupVersionKind) bool {
+	for _, aGVK := range GVKs {
+		if someGVK == aGVK {
+			return true
+		}
+	}
+	return false
 }
 
 // Given a resource, a list of template-able fields and template variable values,

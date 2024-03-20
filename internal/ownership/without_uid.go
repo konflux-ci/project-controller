@@ -1,8 +1,6 @@
 package ownership
 
 import (
-	"slices"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -36,9 +34,12 @@ func upsertOwnerRef(ref metav1.OwnerReference, object metav1.Object) {
 // Find, within the given slice an ownerReference record that refers to the
 // same Group and Kind as the given reference
 func indexOwnerRef(ownerReferences []metav1.OwnerReference, ref metav1.OwnerReference) int {
-	return slices.IndexFunc(ownerReferences, func(r metav1.OwnerReference) bool {
-		return referSameGroupKind(r, ref)
-	})
+	for i, r := range ownerReferences {
+		if referSameGroupKind(r, ref) {
+			return i
+		}
+	}
+	return -1
 }
 
 // Returns true if both given references refer to the same resource Group and
