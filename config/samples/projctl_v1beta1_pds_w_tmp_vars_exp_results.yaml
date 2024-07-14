@@ -1,0 +1,52 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Application
+metadata:
+  name: "cool-app-1-0-0"
+  annotations:
+    pvc.konflux.dev/cloned-from: cool-app1-main
+  ownerReferences:
+  - apiVersion: "projctl.konflux.dev/v1beta1"
+    kind: "ProjectDevelopmentStream"
+    name: "projectdevelopmentstream-sample-w-template-vars"
+spec:
+  displayName: "Cool App 1.0.0"
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: "cool-comp1-1-0-0"
+  annotations:
+    pvc.konflux.dev/cloned-from: cool_comp1_main
+  ownerReferences:
+  - apiVersion: "appstudio.redhat.com/v1alpha1"
+    kind: "Application"
+    name: "cool-app-1-0-0"
+spec:
+  application: "cool-app-1-0-0"
+  componentName: "cool-comp1-1-0-0"
+  source:
+    git:
+      context: "./"
+      dockerfileUrl: "Dockerfile"
+      revision: "1.0.0"
+      url: git@github.com:example/comp1.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: "cool-comp2-1-0-0"
+  annotations:
+    pvc.konflux.dev/cloned-from: cool_comp2_main
+  ownerReferences:
+  - apiVersion: "appstudio.redhat.com/v1alpha1"
+    kind: "Application"
+    name: "cool-app-1-0-0"
+spec:
+  application: "cool-app-1-0-0"
+  componentName: "cool-comp2-1-0-0"
+  source:
+    git:
+      context: "./"
+      dockerfileUrl: "Dockerfile"
+      revision: "fixed-rev"
+      url: git@github.com:example/comp2.git

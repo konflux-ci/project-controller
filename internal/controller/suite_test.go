@@ -18,7 +18,9 @@ package controller
 
 import (
 	"fmt"
+	"go/build"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"testing"
 
@@ -33,6 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	// Depend on the Application/Component API so we can get the CRD files
+	applicaitonapiv1alpha1 "github.com/konflux-ci/application-api/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -50,11 +54,21 @@ func TestControllers(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	var err error
+
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
+	var appApiSrcImport *build.Package
+	appApiPkgPath := reflect.TypeOf(applicaitonapiv1alpha1.Application{}).PkgPath()
+	appApiSrcImport, err = build.Default.Import(appApiPkgPath, "", build.FindOnly)
+	Expect(err).NotTo(HaveOccurred())
+
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "config", "crd", "bases"),
+			filepath.Join(appApiSrcImport.Dir, "..", "..", "config", "crd", "bases"),
+		},
 		ErrorIfCRDPathMissing: true,
 
 		// The BinaryAssetsDirectory is only required if you want to run the tests directly
@@ -66,7 +80,6 @@ var _ = BeforeSuite(func() {
 			fmt.Sprintf("1.29.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
-	var err error
 	// cfg is defined in this file globally.
 	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
