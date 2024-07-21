@@ -37,6 +37,7 @@ import (
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	// Depend on the Application/Component API so we can get the CRD files
 	applicaitonapiv1alpha1 "github.com/konflux-ci/application-api/api/v1alpha1"
+	imagectrlapiv1alpha1 "github.com/konflux-ci/image-controller/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -53,21 +54,29 @@ func TestControllers(t *testing.T) {
 	RunSpecs(t, "Controller Suite")
 }
 
+func apiObjCrdPath(apiObj interface{}) string {
+	var err error
+	var appApiSrcImport *build.Package
+
+	appApiPkgPath := reflect.TypeOf(apiObj).PkgPath()
+	appApiSrcImport, err = build.Default.Import(appApiPkgPath, "", build.FindOnly)
+	Expect(err).NotTo(HaveOccurred())
+
+	return filepath.Join(appApiSrcImport.Dir, "..", "..", "config", "crd", "bases")
+}
+
 var _ = BeforeSuite(func() {
 	var err error
 
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
-	var appApiSrcImport *build.Package
-	appApiPkgPath := reflect.TypeOf(applicaitonapiv1alpha1.Application{}).PkgPath()
-	appApiSrcImport, err = build.Default.Import(appApiPkgPath, "", build.FindOnly)
-	Expect(err).NotTo(HaveOccurred())
 
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crd", "bases"),
-			filepath.Join(appApiSrcImport.Dir, "..", "..", "config", "crd", "bases"),
+			apiObjCrdPath(applicaitonapiv1alpha1.Application{}),
+			apiObjCrdPath(imagectrlapiv1alpha1.ImageRepository{}),
 		},
 		ErrorIfCRDPathMissing: true,
 

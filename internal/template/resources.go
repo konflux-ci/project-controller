@@ -66,6 +66,21 @@ var supportedResourceTypes = []struct {
 			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application",
 		},
 	},
+	{
+		supportedAPIs: []apischema.GroupVersionKind{
+			{Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "ImageRepository"},
+		},
+		templateAbleNameFields: [][]string{
+			{"metadata", "name"},
+			{"metadata", "labels", "appstudio.redhat.com/component"},
+			{"metadata", "labels", "appstudio.redhat.com/application"},
+			{"spec", "image", "name"},
+		},
+		ownerNameField: []string{"metadata", "labels", "appstudio.redhat.com/component"},
+		ownerAPI: apischema.GroupVersionKind{
+			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Component",
+		},
+	},
 }
 
 // Make the resources to be owned by the given ProjectDevelopmentStream as

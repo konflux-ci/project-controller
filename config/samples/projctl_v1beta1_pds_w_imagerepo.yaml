@@ -1,0 +1,11 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-sample-w-imagerepo
+spec:
+  project: project-sample
+  template:
+    name: pdst-sample-w-imagerepo
+    values:
+    - name: version
+      value: "2.2.0"

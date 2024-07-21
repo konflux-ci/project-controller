@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -40,49 +41,59 @@ import (
 )
 
 var _ = Describe("ProjectDevelopmentStream Controller", func() {
-	Context("When reconciling a resource", func() {
-		ctx := context.Background()
+	DescribeTableSubtree("When reconciling a PDS resource",
+		func(pdsName, expFile string, resFiles ...string) {
+			ctx := context.Background()
 
-		var testNs string
-		var testNsN types.NamespacedName
+			var testNs string
+			var testNsN types.NamespacedName
 
-		BeforeEach(func() {
-			testNs = setupTestNamespace(ctx, k8sClient)
-			testNsN = types.NamespacedName{
-				Namespace: testNs,
-				Name:      "projectdevelopmentstream-sample-w-template-vars",
-			}
+			BeforeEach(func() {
+				testNs = setupTestNamespace(ctx, k8sClient)
+				testNsN = types.NamespacedName{Namespace: testNs, Name: pdsName}
 
-			resFiles := []string{
-				"projctl_v1beta1_project.yaml",
-				"projctl_v1beta1_projectdevelopmentstreamtemplate.yaml",
-				"projctl_v1beta1_projectdevelopmentstream_w_template_vars.yaml",
-			}
-			for _, resFile := range resFiles {
-				applyFile(ctx, k8sClient, resFile, testNs)
-			}
-		})
+				for _, resFile := range resFiles {
+					applyFile(ctx, k8sClient, resFile, testNs)
+				}
+			})
 
-		It("should successfully generate resource from template", func() {
-			var err error
+			It("should successfully generate the expected resource from the template", func() {
+				var err error
 
-			controllerReconciler := &ProjectDevelopmentStreamReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-			}
+				controllerReconciler := &ProjectDevelopmentStreamReconciler{
+					Client: k8sClient,
+					Scheme: k8sClient.Scheme(),
+				}
 
-			By("Setting the owner reference")
-			Expect(ownership.HasProductRef(k8sClient, getPDS(ctx, k8sClient, testNsN))).To(BeFalse())
-			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(ownership.HasProductRef(k8sClient, getPDS(ctx, k8sClient, testNsN))).To(BeTrue())
+				By("Setting the owner reference")
+				Expect(ownership.HasProductRef(k8sClient, getPDS(ctx, k8sClient, testNsN))).To(BeFalse())
+				_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(ownership.HasProductRef(k8sClient, getPDS(ctx, k8sClient, testNsN))).To(BeTrue())
 
-			By("Creating the templates objects")
-			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
-			Expect(err).NotTo(HaveOccurred())
-			checkExpectedFile(ctx, k8sClient, "projctl_v1beta1_pds_w_tmp_vars_exp_results.yaml", testNs)
-		})
-	})
+				By("Creating the templates objects")
+				_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+				Expect(err).NotTo(HaveOccurred())
+				checkExpectedFile(ctx, k8sClient, expFile, testNs)
+			})
+		},
+		Entry(
+			"Application and Component resources",
+			"projectdevelopmentstream-sample-w-template-vars",
+			"projctl_v1beta1_pds_w_tmp_vars_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_projectdevelopmentstreamtemplate.yaml",
+			"projctl_v1beta1_projectdevelopmentstream_w_template_vars.yaml",
+		),
+		Entry(
+			"ImageRepository resource",
+			"pds-sample-w-imagerepo",
+			"projctl_v1beta1_pds_w_imagerepo_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pdst_w_imagerepo.yaml",
+			"projctl_v1beta1_pds_w_imagerepo.yaml",
+		),
+	)
 })
 
 func resourceFromFile(fname string, resource client.Object) {
@@ -102,16 +113,22 @@ func applyFile(ctx context.Context, k8sClient client.Client, fname string, ns st
 }
 
 func setupTestNamespace(ctx context.Context, k8sClient client.Client) string {
-	nsName := fmt.Sprintf("test-ns-%d", GinkgoParallelProcess())
-	nsNsName := types.NamespacedName{
-		Name:      nsName,
-		Namespace: "default",
-	}
 	var ns corev1.Namespace
-	err := k8sClient.Get(ctx, nsNsName, &ns)
-	if !errors.IsNotFound(err) {
+	nsName := fmt.Sprintf("test-ns-%d", GinkgoParallelProcess())
+	for {
+		nsNsName := types.NamespacedName{
+			Name:      nsName,
+			Namespace: "default",
+		}
+		err := k8sClient.Get(ctx, nsNsName, &ns)
+		if errors.IsNotFound(err) {
+			break
+		}
 		Expect(err).NotTo(HaveOccurred())
 		Expect(k8sClient.Delete(ctx, &ns)).To(Succeed())
+		// Add a random number to the name to make a unique NS name so we don't
+		// have to wait for the deletion to finish
+		nsName = fmt.Sprintf("test-ns-%d-%d", GinkgoParallelProcess(), rand.Intn(10000))
 	}
 	ns = corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName}}
 	Expect(k8sClient.Create(ctx, &ns)).To(Succeed())
@@ -154,7 +171,7 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 
 	emdm := emd.(map[string]interface{})
 	nmd := make(map[string]interface{})
-	for _, key := range []string{"ownerReferences", "annotations", "name", "namespace"} {
+	for _, key := range []string{"ownerReferences", "annotations", "labels", "name", "namespace"} {
 		if v, ok := emdm[key]; ok {
 			nmd[key] = v
 		}

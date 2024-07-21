@@ -1,3 +1,25 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  labels:
+    app.kubernetes.io/name: projectdevelopmentstream
+    app.kubernetes.io/instance: projectdevelopmentstream-sample
+    app.kubernetes.io/part-of: project-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: project-controller
+  name: projectdevelopmentstream-sample-w-template-vars
+  ownerReferences:
+  - apiVersion: projctl.konflux.dev/v1beta1
+    kind: Project
+    name: "project-sample"
+spec:
+  project: project-sample
+  template:
+    name: projectdevelopmentstreamtemplate-sample
+    values:
+    - name: version
+      value: "1.0.0"
+---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Application
 metadata:
@@ -41,6 +63,7 @@ metadata:
   - apiVersion: "appstudio.redhat.com/v1alpha1"
     kind: "Application"
     name: "cool-app-1-0-0"
+
 spec:
   application: "cool-app-1-0-0"
   componentName: "cool-comp2-1-0-0"
