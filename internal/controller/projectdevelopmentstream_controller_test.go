@@ -93,6 +93,14 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			"projctl_v1beta1_pdst_w_imagerepo.yaml",
 			"projctl_v1beta1_pds_w_imagerepo.yaml",
 		),
+		Entry(
+			"IntegTestScenario resource",
+			"pds-sample-w-intgtstscnario",
+			"projctl_v1beta1_pds_w_intgtstscnario_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pdst_w_intgtstscnario.yaml",
+			"projctl_v1beta1_pds_w_intgtstscnario.yaml",
+		),
 	)
 })
 

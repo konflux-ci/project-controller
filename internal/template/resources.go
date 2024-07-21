@@ -34,6 +34,10 @@ var supportedResourceTypes = []struct {
 	ownerNameField []string
 	// The owner object GVK. Will only be used if ownerNameField is not empty
 	ownerAPI apischema.GroupVersionKind
+	// The owner object should be marked as the controller
+	ownerIsController bool
+	// The owner object deletion should be blocked
+	ownerDeletionBlocked bool
 }{
 	{
 		supportedAPIs: []apischema.GroupVersionKind{
@@ -81,6 +85,24 @@ var supportedResourceTypes = []struct {
 			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Component",
 		},
 	},
+	{
+		supportedAPIs: []apischema.GroupVersionKind{
+			{Group: "appstudio.redhat.com", Version: "v1beta2", Kind: "IntegrationTestScenario"},
+		},
+		templateAbleNameFields: [][]string{
+			{"metadata", "name"},
+			{"spec", "application"},
+			// TODO: Somehow allow templating spec.params and spec.resolverRef.params
+			// which are arrays of name/value pairs. This would require changes to
+			// applyResourceTemplate and possibly validateResourceNameFields
+		},
+		ownerNameField: []string{"spec", "application"},
+		ownerAPI: apischema.GroupVersionKind{
+			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application",
+		},
+		ownerIsController:    true,
+		ownerDeletionBlocked: true,
+	},
 }
 
 // Make the resources to be owned by the given ProjectDevelopmentStream as
@@ -122,7 +144,13 @@ func MkResources(
 				if ok && err == nil {
 					// If we can't find the owner name field, we just skip
 					// setting an owner
-					ownership.SetWithoutUid(resource, srt.ownerAPI, ownerName)
+					ownership.SetWithoutUid(
+						resource,
+						srt.ownerAPI,
+						ownerName,
+						srt.ownerIsController,
+						srt.ownerDeletionBlocked,
+					)
 				}
 			}
 			resources = append(resources, resource)
