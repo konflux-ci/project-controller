@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.21.10
 
 require (
+	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.4.2
 	github.com/konflux-ci/application-api v0.0.0-20240527211352-be061932d497
 	github.com/konflux-ci/image-controller v0.0.0-20240712153454-e138500d2d42

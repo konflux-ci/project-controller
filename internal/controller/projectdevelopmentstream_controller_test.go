@@ -36,6 +36,7 @@ import (
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	"github.com/konflux-ci/project-controller/internal/ownership"
+	"github.com/konflux-ci/project-controller/pkg/testhelpers"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -105,12 +106,10 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 })
 
 func resourceFromFile(fname string, resource client.Object) {
-	f, err := os.Open(filepath.Join("..", "..", "config", "samples", fname))
-	Expect(err).NotTo(HaveOccurred())
-	defer func() { _ = f.Close() }()
-	buf, err := io.ReadAll(f)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(yaml.UnmarshalStrict(buf, resource)).To(Succeed())
+	testhelpers.ResourceFromFile(
+		filepath.Join("..", "..", "config", "samples", fname),
+		resource,
+	)
 }
 
 func applyFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
