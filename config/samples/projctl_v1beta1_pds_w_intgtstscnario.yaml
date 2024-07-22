@@ -1,0 +1,11 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-sample-w-intgtstscnario
+spec:
+  project: project-sample
+  template:
+    name: pdst-sample-w-intgtstscnario
+    values:
+    - name: version
+      value: "3.3.0"

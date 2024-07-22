@@ -1,0 +1,91 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-sample-w-intgtstscnario
+  ownerReferences:
+  - apiVersion: projctl.konflux.dev/v1beta1
+    kind: Project
+    name: project-sample
+spec:
+  project: project-sample
+  template:
+    name: pdst-sample-w-intgtstscnario
+    values:
+    - name: version
+      value: "3.3.0"
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Application
+metadata:
+  name: "cool-app-3-3-0"
+  ownerReferences:
+  - apiVersion: "projctl.konflux.dev/v1beta1"
+    kind: "ProjectDevelopmentStream"
+    name: "pds-sample-w-intgtstscnario"
+spec:
+  displayName: "Cool App 3.3.0"
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: "cool-comp1-3-3-0"
+  ownerReferences:
+  - apiVersion: "appstudio.redhat.com/v1alpha1"
+    kind: "Application"
+    name: "cool-app-3-3-0"
+spec:
+  application: "cool-app-3-3-0"
+  componentName: "cool-comp1-3-3-0"
+  source:
+    git:
+      context: "./"
+      dockerfileUrl: "Dockerfile"
+      revision: "3.3.0"
+      url: git@github.com:example/comp1.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: ImageRepository
+metadata:
+  name: "cool-comp1-repo-3-3-0"
+  labels:
+    appstudio.redhat.com/component: "cool-comp1-3-3-0"
+    appstudio.redhat.com/application: "cool-app-3-3-0"
+  ownerReferences:
+  - apiVersion: "appstudio.redhat.com/v1alpha1"
+    kind: "Component"
+    name: "cool-comp1-3-3-0"
+spec:
+  image:
+    visibility: public
+  credentials:
+    verify-linking: true
+---
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  annotations:
+    test.appstudio.openshift.io/kind: enterprise-contract
+  name: cool-app-3-3-0-enterprise-contract
+  ownerReferences:
+    - apiVersion: appstudio.redhat.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Application
+      name: "cool-app-3-3-0"
+spec:
+  application: "cool-app-3-3-0"
+  contexts:
+    - description: Application testing
+      name: application
+  params:
+    - name: POLICY_CONFIGURATION
+      value: rhtap-releng-tenant/app-interface-standard
+  resolverRef:
+    params:
+      - name: url
+        value: 'https://github.com/konflux-ci/build-definitions'
+      - name: revision
+        value: main
+      - name: pathInRepo
+        value: pipelines/enterprise-contract.yaml
+    resolver: git

@@ -9,12 +9,21 @@ import (
 // locally when the UID for the owning resource is not yet known.
 // This function also ensure each object only has one ownership record for
 // a particular API group and Kind combination.
-func SetWithoutUid(resource metav1.Object, ownerAPI schema.GroupVersionKind, ownerName string) {
+func SetWithoutUid(
+	resource metav1.Object, ownerAPI schema.GroupVersionKind, ownerName string,
+	ownerIsControlller, ownerDeletionBlocked bool,
+) {
 	apiVersion, kind := ownerAPI.ToAPIVersionAndKind()
 	ref := metav1.OwnerReference{
 		APIVersion: apiVersion,
 		Kind:       kind,
 		Name:       ownerName,
+	}
+	if ownerIsControlller {
+		ref.Controller = &ownerIsControlller
+	}
+	if ownerDeletionBlocked {
+		ref.BlockOwnerDeletion = &ownerDeletionBlocked
 	}
 	upsertOwnerRef(ref, resource)
 }

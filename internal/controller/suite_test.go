@@ -38,6 +38,7 @@ import (
 	// Depend on the Application/Component API so we can get the CRD files
 	applicaitonapiv1alpha1 "github.com/konflux-ci/application-api/api/v1alpha1"
 	imagectrlapiv1alpha1 "github.com/konflux-ci/image-controller/api/v1alpha1"
+	intgtstscnariov1beta2 "github.com/konflux-ci/integration-service/api/v1beta2"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -77,6 +78,7 @@ var _ = BeforeSuite(func() {
 			filepath.Join("..", "..", "config", "crd", "bases"),
 			apiObjCrdPath(applicaitonapiv1alpha1.Application{}),
 			apiObjCrdPath(imagectrlapiv1alpha1.ImageRepository{}),
+			apiObjCrdPath(intgtstscnariov1beta2.IntegrationTestScenario{}),
 		},
 		ErrorIfCRDPathMissing: true,
 
