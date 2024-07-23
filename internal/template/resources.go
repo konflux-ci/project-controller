@@ -16,6 +16,7 @@ import (
 //+kubebuilder:rbac:groups=appstudio.redhat.com,resources=components,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=appstudio.redhat.com,resources=imagerepositories,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=appstudio.redhat.com,resources=integrationtestscenarios,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=appstudio.redhat.com,resources=releaseplans,verbs=get;list;watch;create;update;patch;delete
 
 // List of resource types supported by templates and various details about how
 // to instantiate resources of those types. The list order determines the order
@@ -97,6 +98,21 @@ var supportedResourceTypes = []struct {
 			// TODO: Somehow allow templating spec.params and spec.resolverRef.params
 			// which are arrays of name/value pairs. This would require changes to
 			// applyResourceTemplate and possibly validateResourceNameFields
+		},
+		ownerNameField: []string{"spec", "application"},
+		ownerAPI: apischema.GroupVersionKind{
+			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application",
+		},
+		ownerIsController:    true,
+		ownerDeletionBlocked: true,
+	},
+	{
+		supportedAPIs: []apischema.GroupVersionKind{
+			{Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "ReleasePlan"},
+		},
+		templateAbleNameFields: [][]string{
+			{"metadata", "name"},
+			{"spec", "application"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
