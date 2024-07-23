@@ -29,6 +29,30 @@ rules:
   - update
   - watch
 - apiGroups:
+  - appstudio.redhat.com
+  resources:
+  - imagerepositories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - appstudio.redhat.com
+  resources:
+  - integrationtestscenarios
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - projctl.konflux.dev
   resources:
   - projectdevelopmentstreams
