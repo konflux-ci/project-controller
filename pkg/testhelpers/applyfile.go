@@ -20,6 +20,7 @@ func ApplyFile(ctx context.Context, k8sClient client.Client, path string, ns str
 	err := k8sClient.Create(ctx, res)
 	if !apierrors.IsAlreadyExists(err) {
 		g.Expect(err).NotTo(g.HaveOccurred())
+		return
 	}
 	res = fileRes.DeepCopy()
 	g.Expect(k8sClient.Patch(
