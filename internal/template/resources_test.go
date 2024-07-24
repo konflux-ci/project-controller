@@ -39,7 +39,6 @@ var _ = Describe("Resources", func() {
 				allAPIsWFinAccessNdedEntries = append(allAPIsWFinAccessNdedEntries, Entry(nil, gvk))
 			}
 
-
 			BeforeAll(func() {
 				plz = pluralize.NewClient()
 			})
@@ -76,12 +75,12 @@ var _ = Describe("Resources", func() {
 				func(api apischema.GroupVersionKind) {
 					Expect(managerRole.Rules).To(ContainElement(
 						MatchFields(IgnoreExtras, Fields{
-							"APIGroups":     ContainElement(api.Group),
-							"Resources":     ContainElement(fmt.Sprintf(
+							"APIGroups": ContainElement(api.Group),
+							"Resources": ContainElement(fmt.Sprintf(
 								"%s/finalizers", plz.Plural(strings.ToLower(api.Kind))),
 							),
 							"ResourceNames": BeEmpty(),
-							"Verbs": ContainElements("update"),
+							"Verbs":         ContainElements("update"),
 						}),
 					))
 				},

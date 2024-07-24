@@ -5,9 +5,9 @@ import (
 
 	g "github.com/onsi/gomega"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func ApplyFile(ctx context.Context, k8sClient client.Client, path string, ns string) {
@@ -23,8 +23,8 @@ func ApplyFile(ctx context.Context, k8sClient client.Client, path string, ns str
 	}
 	res = fileRes.DeepCopy()
 	g.Expect(k8sClient.Patch(
-		ctx, res, 
-		client.Apply, 
+		ctx, res,
+		client.Apply,
 		client.FieldOwner("test-suite"), client.ForceOwnership,
 	)).To(g.Succeed())
 }

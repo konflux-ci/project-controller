@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -36,7 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	"github.com/konflux-ci/project-controller/pkg/testhelpers"
@@ -136,7 +136,7 @@ var _ = AfterSuite(func() {
 func setupSystemNamespace(ctx context.Context, client client.Client) {
 	ns := corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "system"}}
 	Expect(client.Create(ctx, &ns)).To(Or(
-		Succeed(), 
+		Succeed(),
 		MatchError(apierrors.IsAlreadyExists, "IsAlreadyExists"),
 	))
 }
