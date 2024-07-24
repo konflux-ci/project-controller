@@ -1,5 +1,30 @@
 # Contributing to this project
 
+## Automated testing with CRC
+
+After installing CRC and starting a cluster, we can use the `kubectl` context 
+already prepared for us to connect to the cluster.
+
+    kubectl config use-context crc-admin
+
+This should allow us to run commands like:
+
+    kubectl cluster-info
+
+The output should resemble toe following:
+
+    Kubernetes control plane is running at https://api.crc.testing:6443
+
+    To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+Now we can run our tests:
+
+    USE_EXISTING_CLUSTER=true KEEP_TEST_NAMESPACES=true ginkgo run -v internal/controller
+
+Since we have `KEEP_TEST_NAMESPACES` set to `true` we can find namespaces with 
+names like `test-ns-1-1234` in the cluster once the tests are done and inspect
+the obejcts that were created.
+
 ## Manual testing with CRC
 
 Login to CRC as *kubeadmin*. The password would be displayed when bringing up
