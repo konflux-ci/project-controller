@@ -5,13 +5,26 @@ import (
 
 	g "github.com/onsi/gomega"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func ApplyFile(ctx context.Context, k8sClient client.Client, path string, ns string) {
-	var res unstructured.Unstructured
-	ResourceFromFile(path, &res)
-	res.SetNamespace(ns)
-	g.Expect(k8sClient.Create(ctx, &res)).To(g.Succeed())
+	var res, fileRes *unstructured.Unstructured
+	fileRes = new(unstructured.Unstructured)
+	ResourceFromFile(path, fileRes)
+	fileRes.SetNamespace(ns)
+	// Keep a clean copy of the data from the file
+	res = fileRes.DeepCopy()
+	err := k8sClient.Create(ctx, res)
+	if !apierrors.IsAlreadyExists(err) {
+		g.Expect(err).NotTo(g.HaveOccurred())
+	}
+	res = fileRes.DeepCopy()
+	g.Expect(k8sClient.Patch(
+		ctx, res, 
+		client.Apply, 
+		client.FieldOwner("test-suite"), client.ForceOwnership,
+	)).To(g.Succeed())
 }

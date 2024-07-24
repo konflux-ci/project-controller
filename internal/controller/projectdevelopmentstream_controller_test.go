@@ -24,6 +24,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -115,7 +116,7 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 
 func applySampleFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
 	testhelpers.ApplyFile(
-		ctx, k8sClient, 
+		ctx, k8sClient,
 		filepath.Join("..", "..", "config", "samples", fname),
 		ns,
 	)
@@ -134,14 +135,18 @@ func setupTestNamespace(ctx context.Context, k8sClient client.Client) string {
 			break
 		}
 		Expect(err).NotTo(HaveOccurred())
-		Expect(k8sClient.Delete(ctx, &ns)).To(Succeed())
+		if !keepNamespaces() {
+			Expect(k8sClient.Delete(ctx, &ns)).To(Succeed())
+		}
 		// Add a random number to the name to make a unique NS name so we don't
 		// have to wait for the deletion to finish
 		nsName = fmt.Sprintf("test-ns-%d-%d", GinkgoParallelProcess(), rand.Intn(10000))
 	}
 	ns = corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName}}
 	Expect(k8sClient.Create(ctx, &ns)).To(Succeed())
-	DeferCleanup(k8sClient.Delete, &ns)
+	if !keepNamespaces() {
+		DeferCleanup(k8sClient.Delete, &ns)
+	}
 	return nsName
 }
 
@@ -193,4 +198,8 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 		}
 	}
 	Expect(unstructured.SetNestedField(obj.Object, nmd, "metadata")).To(Succeed())
+}
+
+func keepNamespaces() bool {
+	return strings.ToLower(os.Getenv("KEEP_TEST_NAMESPACES")) == "true"
 }
