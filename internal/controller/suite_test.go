@@ -39,6 +39,7 @@ import (
 	applicaitonapiv1alpha1 "github.com/konflux-ci/application-api/api/v1alpha1"
 	imagectrlapiv1alpha1 "github.com/konflux-ci/image-controller/api/v1alpha1"
 	intgtstscnariov1beta2 "github.com/konflux-ci/integration-service/api/v1beta2"
+	releasev1alpha1 "github.com/konflux-ci/release-service/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -79,6 +80,7 @@ var _ = BeforeSuite(func() {
 			apiObjCrdPath(applicaitonapiv1alpha1.Application{}),
 			apiObjCrdPath(imagectrlapiv1alpha1.ImageRepository{}),
 			apiObjCrdPath(intgtstscnariov1beta2.IntegrationTestScenario{}),
+			apiObjCrdPath(releasev1alpha1.ReleasePlan{}),
 		},
 		ErrorIfCRDPathMissing: true,
 

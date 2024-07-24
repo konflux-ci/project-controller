@@ -1,0 +1,90 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  name: pdst-sample-w-relpln
+spec:
+  project: project-sample
+  variables:
+  - name: version
+    description: A version number for the new development stream
+  - name: versionName
+    defaultValue: "{{hyphenize .version}}"
+    description: A resource-name friendly version value
+
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-{{.versionName}}"
+    spec:
+      displayName: "Cool App {{.version}}"
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp1-{{.versionName}}"
+    spec:
+      application: "cool-app-{{.versionName}}"
+      componentName: "cool-comp1-{{.versionName}}"
+      source:
+        git:
+          context: "./"
+          dockerfileUrl: "Dockerfile"
+          revision: "{{.version}}"
+          url: git@github.com:example/comp1.git
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: ImageRepository
+    metadata:
+      name: "cool-comp1-repo-{{.versionName}}"
+      labels:
+        appstudio.redhat.com/component: "cool-comp1-{{.versionName}}"
+        appstudio.redhat.com/application: "cool-app-{{.versionName}}"
+    spec:
+      image:
+        visibility: public
+      credentials:
+        verify-linking: true
+
+  - apiVersion: appstudio.redhat.com/v1beta2
+    kind: IntegrationTestScenario
+    metadata:
+      annotations:
+        test.appstudio.openshift.io/kind: enterprise-contract
+      name: cool-app-{{.versionName}}-enterprise-contract
+    spec:
+      application: "cool-app-{{.versionName}}"
+      contexts:
+        - description: Application testing
+          name: application
+      params:
+        - name: POLICY_CONFIGURATION
+          value: rhtap-releng-tenant/app-interface-standard
+      resolverRef:
+        params:
+          - name: url
+            value: 'https://github.com/konflux-ci/build-definitions'
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: pipelines/enterprise-contract.yaml
+        resolver: git
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: ReleasePlan
+    metadata:
+      name: cool-app-{{.versionName}}-release-to-quay
+      ownerReferences:
+        - apiVersion: appstudio.redhat.com/v1alpha1
+          blockOwnerDeletion: true
+          controller: true
+          kind: Application
+          name: "cool-app-{{.versionName}}"
+      labels:
+        release.appstudio.openshift.io/author: system_serviceaccount_remote-argocd_remote-argocd
+        release.appstudio.openshift.io/auto-release: 'true'
+        release.appstudio.openshift.io/standing-attribution: 'true'
+    spec:
+      application: "cool-app-{{.versionName}}"
+      releaseGracePeriodDays: 7
+      target: cool-app-releng-tenant

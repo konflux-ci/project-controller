@@ -102,6 +102,14 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			"projctl_v1beta1_pdst_w_intgtstscnario.yaml",
 			"projctl_v1beta1_pds_w_intgtstscnario.yaml",
 		),
+		Entry(
+			"ReleasePlan resource",
+			"pds-sample-w-relpln",
+			"projctl_v1beta1_pds_w_relpln_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pdst_w_relpln.yaml",
+			"projctl_v1beta1_pds_w_relpln.yaml",
+		),
 	)
 })
 
