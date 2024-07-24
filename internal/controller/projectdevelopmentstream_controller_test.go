@@ -54,7 +54,7 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				testNsN = types.NamespacedName{Namespace: testNs, Name: pdsName}
 
 				for _, resFile := range resFiles {
-					applyFile(ctx, k8sClient, resFile, testNs)
+					applySampleFile(ctx, k8sClient, resFile, testNs)
 				}
 			})
 
@@ -62,8 +62,8 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				var err error
 
 				controllerReconciler := &ProjectDevelopmentStreamReconciler{
-					Client: k8sClient,
-					Scheme: k8sClient.Scheme(),
+					Client: saClient,
+					Scheme: saClient.Scheme(),
 				}
 
 				By("Setting the owner reference")
@@ -113,18 +113,12 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 	)
 })
 
-func resourceFromFile(fname string, resource client.Object) {
-	testhelpers.ResourceFromFile(
+func applySampleFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
+	testhelpers.ApplyFile(
+		ctx, k8sClient, 
 		filepath.Join("..", "..", "config", "samples", fname),
-		resource,
+		ns,
 	)
-}
-
-func applyFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
-	var res unstructured.Unstructured
-	resourceFromFile(fname, &res)
-	res.SetNamespace(ns)
-	Expect(k8sClient.Create(ctx, &res)).To(Succeed())
 }
 
 func setupTestNamespace(ctx context.Context, k8sClient client.Client) string {
