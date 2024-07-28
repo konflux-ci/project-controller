@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/funcr"
+	"github.com/konflux-ci/project-controller/pkg/logr/muxr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
@@ -122,6 +123,20 @@ var _ = Describe("Logr", func() {
 			var builder *strings.Builder
 			logger, builder = stringsBuilderLogr()
 			outputs = []fmt.Stringer{builder}
+		})
+
+		ImplementsLogrBehaviour()
+	})
+
+	Describe("Muxr - a multiplexing logger", func() {
+		BeforeEach(func() {
+			var b1, b2 *strings.Builder
+			var l1, l2 logr.Logger
+			l1, b1 = stringsBuilderLogr()
+			l2, b2 = stringsBuilderLogr()
+			outputs = []fmt.Stringer{b1, b2}
+
+			logger = muxr.NewMuxLogger(l1, l2)
 		})
 
 		ImplementsLogrBehaviour()
