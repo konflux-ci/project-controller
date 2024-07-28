@@ -11,7 +11,7 @@ This should allow us to run commands like:
 
     kubectl cluster-info
 
-The output should resemble toe following:
+The output should resemble the following:
 
     Kubernetes control plane is running at https://api.crc.testing:6443
 
