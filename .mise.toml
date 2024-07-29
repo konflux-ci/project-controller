@@ -1,4 +1,10 @@
 [tools]
 go = "1.21.10"
 kubectl = "1.30.2"
-"go:github.com/onsi/ginkgo/v2/ginkgo" = "2.14.0"
+"go:github.com/onsi/ginkgo/v2/ginkgo" = "2.19.0"
+kind = "0.22.0"
+crc = "2.39.0"
+
+[plugins]
+# Need to use Barak's fork until PR#8 is merged upstream
+crc = 'https://github.com/ifireball/asdf-crc#revert-bkorren-fix'

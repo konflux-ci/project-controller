@@ -17,6 +17,7 @@ limitations under the License.
 package controller
 
 import (
+	"context"
 	"fmt"
 	"go/build"
 	"path/filepath"
@@ -27,6 +28,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -35,6 +39,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/pkg/testhelpers"
+
 	// Depend on the Application/Component API so we can get the CRD files
 	applicaitonapiv1alpha1 "github.com/konflux-ci/application-api/api/v1alpha1"
 	imagectrlapiv1alpha1 "github.com/konflux-ci/image-controller/api/v1alpha1"
@@ -48,6 +54,7 @@ import (
 
 var cfg *rest.Config
 var k8sClient client.Client
+var saClient client.Client
 var testEnv *envtest.Environment
 
 func TestControllers(t *testing.T) {
@@ -107,6 +114,17 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
+	By("setting up the controller service account")
+
+	ctx := context.Background()
+	setupSystemNamespace(ctx, k8sClient)
+	setupServiceAccount(ctx, k8sClient)
+	saCfg := new(rest.Config)
+	*saCfg = *cfg
+	saCfg.Impersonate.UserName = "system:serviceaccount:system:controller-manager"
+	saClient, err = client.New(saCfg, client.Options{Scheme: scheme.Scheme})
+	Expect(err).NotTo(HaveOccurred())
+	Expect(saClient).NotTo(BeNil())
 })
 
 var _ = AfterSuite(func() {
@@ -114,3 +132,22 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
 })
+
+func setupSystemNamespace(ctx context.Context, client client.Client) {
+	ns := corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "system"}}
+	Expect(client.Create(ctx, &ns)).To(Or(
+		Succeed(),
+		MatchError(apierrors.IsAlreadyExists, "IsAlreadyExists"),
+	))
+}
+
+func setupServiceAccount(ctx context.Context, client client.Client) {
+	saFiles := []string{"role", "service_account", "role_binding"}
+	for _, saFile := range saFiles {
+		testhelpers.ApplyFile(
+			ctx, client,
+			filepath.Join("..", "..", "config", "rbac", fmt.Sprintf("%s.yaml", saFile)),
+			"system",
+		)
+	}
+}

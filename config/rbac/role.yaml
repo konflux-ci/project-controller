@@ -19,6 +19,12 @@ rules:
 - apiGroups:
   - appstudio.redhat.com
   resources:
+  - applications/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - appstudio.redhat.com
+  resources:
   - components
   verbs:
   - create

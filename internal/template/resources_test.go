@@ -1,6 +1,7 @@
 package template
 
 import (
+	"fmt"
 	"strings"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -22,12 +23,20 @@ var _ = Describe("Resources", func() {
 			var plz *pluralize.Client
 
 			var allSupportedAPIs []apischema.GroupVersionKind
+			var allAPIsWFinalizerAccessNeeded []apischema.GroupVersionKind
 			for _, srt := range supportedResourceTypes {
 				allSupportedAPIs = append(allSupportedAPIs, srt.supportedAPIs...)
+				if srt.ownerDeletionBlocked || srt.ownerIsController {
+					allAPIsWFinalizerAccessNeeded = append(allAPIsWFinalizerAccessNeeded, srt.ownerAPI)
+				}
 			}
 			allSupportedAPIEntries := make([]TableEntry, 0, len(allSupportedAPIs))
 			for _, gvk := range allSupportedAPIs {
 				allSupportedAPIEntries = append(allSupportedAPIEntries, Entry(nil, gvk))
+			}
+			allAPIsWFinAccessNdedEntries := make([]TableEntry, 0, len(allAPIsWFinalizerAccessNeeded))
+			for _, gvk := range allAPIsWFinalizerAccessNeeded {
+				allAPIsWFinAccessNdedEntries = append(allAPIsWFinAccessNdedEntries, Entry(nil, gvk))
 			}
 
 			BeforeAll(func() {
@@ -60,6 +69,22 @@ var _ = Describe("Resources", func() {
 					))
 				},
 				allSupportedAPIEntries,
+			)
+			DescribeTable(
+				"For each API GVK we need finalizer update permissions on",
+				func(api apischema.GroupVersionKind) {
+					Expect(managerRole.Rules).To(ContainElement(
+						MatchFields(IgnoreExtras, Fields{
+							"APIGroups": ContainElement(api.Group),
+							"Resources": ContainElement(fmt.Sprintf(
+								"%s/finalizers", plz.Plural(strings.ToLower(api.Kind))),
+							),
+							"ResourceNames": BeEmpty(),
+							"Verbs":         ContainElements("update"),
+						}),
+					))
+				},
+				allAPIsWFinAccessNdedEntries,
 			)
 		})
 	})
