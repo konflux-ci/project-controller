@@ -1,0 +1,36 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Application
+metadata:
+  name: "cool-app-5-5-0"
+  ownerReferences:
+  - apiVersion: "projctl.konflux.dev/v1beta1"
+    kind: "ProjectDevelopmentStream"
+    name: "pds-sample-w-existing-comp"
+spec:
+  displayName: "Cool App 5.5.0"
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: "cool-comp1-5-5-0"
+  ownerReferences:
+  - apiVersion: "appstudio.redhat.com/v1alpha1"
+    kind: "Application"
+    name: "cool-app-5-5-0"
+  annotations:
+    applicationFailCounter: "0"    
+  finalizers:
+    - test.appstudio.openshift.io/component
+    - image-controller.appstudio.openshift.io/image-repository
+    - image-registry-secret-sa-link.component.appstudio.openshift.io/finalizer
+    - pac.component.appstudio.openshift.io/finalizer  
+spec:
+  application: "cool-app-5-5-0"
+  componentName: "cool-comp1-5-5-0"
+  containerImage: "meyreg.io/cool-app/cool-comp1:v5-5-0-acbdef1"  
+  source:
+    git:
+      context: "./"
+      dockerfileUrl: "Dockerfile"
+      revision: "5.5.0"
+      url: git@github.com:example/comp1.git
