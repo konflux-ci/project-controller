@@ -178,7 +178,7 @@ func MkResources(
 	for i, unstructuredObj := range pdst.Spec.Resources {
 		if unhandledTemplates[i] {
 			return nil, fmt.Errorf(
-				"Unsupported resource type in template: %s",
+				"unsupported resource type in template: %s",
 				unstructuredObj.GroupVersionKind(),
 			)
 		}
@@ -206,18 +206,18 @@ func applyResourceTemplate(
 	for _, path := range templateAbleFields {
 		valueTemplate, ok, err := unstructured.NestedString(resource.Object, path...)
 		if err != nil {
-			return fmt.Errorf("Error reading resource template: %s", err)
+			return fmt.Errorf("error reading resource template: %s", err)
 		}
 		if !ok {
 			continue
 		}
 		value, err := executeTemplate(valueTemplate, templateVarValues)
 		if err != nil {
-			return fmt.Errorf("Error applying resource template: %s", err)
+			return fmt.Errorf("error applying resource template: %s", err)
 		}
 		err = unstructured.SetNestedField(resource.Object, value, path...)
 		if err != nil {
-			return fmt.Errorf("Error applying resource template: %s", err)
+			return fmt.Errorf("error applying resource template: %s", err)
 		}
 	}
 	return nil
@@ -240,7 +240,7 @@ func validateResourceNameFields(
 		}
 		if !nameFieldPattern.MatchString(value) {
 			return fmt.Errorf(
-				"Invalid resource name value '%s' for resource field '%s'. "+
+				"invalid resource name value '%s' for resource field '%s'. "+
 					"Consider using the 'hyphenize' template function",
 				value,
 				strings.Join(path, "."),
@@ -272,7 +272,7 @@ func getVarValues(
 			values[variable.Name] = value
 		} else {
 			err = fmt.Errorf(
-				"Template variable '%s' is missing a value and default not defined",
+				"template variable '%s' is missing a value and default not defined",
 				variable.Name,
 			)
 			break
