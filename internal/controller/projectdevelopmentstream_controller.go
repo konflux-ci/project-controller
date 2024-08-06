@@ -18,9 +18,7 @@ package controller
 
 import (
 	"context"
-	"strings"
 
-	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -132,50 +130,13 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	return ctrl.Result{Requeue: requeue}, nil
 }
 
-// Which fields to update for resources from the templates
-var fieldsToUpdate = [][]string{
-	{"spec"},
-	{"metadata", "labels"},
-	{"metadata", "annotations"},
-	{"metadata", "ownerReferences"},
-}
-
 // Create or update the given resource. Returns true if there is an update
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
-	var existing unstructured.Unstructured
-	existing.SetAPIVersion(resource.GetAPIVersion())
-	existing.SetKind(resource.GetKind())
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(resource), &existing); err != nil {
-		if apierrors.IsNotFound(err) {
-			log.Info("Creating new resource")
-			if err := r.Client.Create(ctx, resource); err != nil {
-				log.Error(err, "Failed to create resource")
-			}
-		} else {
-			log.Error(err, "Failed to read existing resource")
-		}
-		return false
-	}
-	update := existing.DeepCopy()
-	for _, field := range fieldsToUpdate {
-		if v, ok, _ := unstructured.NestedFieldNoCopy(resource.Object, field...); ok {
-			if err := unstructured.SetNestedField(update.Object, v, field...); err != nil {
-				log.Error(
-					err,
-					"Failed to update field for generated resource",
-					"field", strings.Join(field, "."),
-				)
-			}
-		}
-	}
-	if equality.Semantic.DeepEqual(existing.Object, update.Object) {
-		log.Info("Resource already up to date")
-		return false
-	}
-	if err := r.Client.Update(ctx, update); err != nil {
-		log.Error(err, "Failed to update resource")
+	err := r.Client.Patch(ctx, resource, client.Apply, client.FieldOwner("projctl.konflux.dev"), client.ForceOwnership)
+	if err != nil {
+		log.Error(err, "Failed to create or update resource")
 		return apierrors.IsConflict(err)
 	}
 	log.Info("Resource updated")

@@ -1,0 +1,21 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: "cool-comp1-5-5-0"
+  annotations:
+    applicationFailCounter: "5"  
+  finalizers:
+    - test.appstudio.openshift.io/component
+    - image-controller.appstudio.openshift.io/image-repository
+    - image-registry-secret-sa-link.component.appstudio.openshift.io/finalizer
+    - pac.component.appstudio.openshift.io/finalizer  
+spec:
+  application: "cool-app-5-5-0"
+  componentName: "cool-comp1-5-5-0"
+  containerImage: "meyreg.io/cool-app/cool-comp1:v5-5-0-acbdef1"
+  source:
+    git:
+      context: "./"
+      dockerfileUrl: "Dockerfile"
+      revision: "wrong"
+      url: git@github.com:example/comp1.git

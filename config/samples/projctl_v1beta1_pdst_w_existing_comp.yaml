@@ -1,0 +1,36 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  name: pdst-sample-w-existing-comp
+spec:
+  project: project-sample
+  variables:
+  - name: version
+    description: A version number for the new development stream
+  - name: versionName
+    defaultValue: "{{hyphenize .version}}"
+    description: A resource-name friendly version value
+
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-{{.versionName}}"
+    spec:
+      displayName: "Cool App {{.version}}"
+
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Component
+    metadata:
+      name: "cool-comp1-{{.versionName}}"
+      annotations:
+        applicationFailCounter: "0"      
+    spec:
+      application: "cool-app-{{.versionName}}"
+      componentName: "cool-comp1-{{.versionName}}"
+      source:
+        git:
+          context: "./"
+          dockerfileUrl: "Dockerfile"
+          revision: "{{.version}}"
+          url: git@github.com:example/comp1.git

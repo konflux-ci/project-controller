@@ -111,6 +111,15 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			"projctl_v1beta1_pdst_w_relpln.yaml",
 			"projctl_v1beta1_pds_w_relpln.yaml",
 		),
+		Entry(
+			"Existing Component resource",
+			"pds-sample-w-existing-comp",
+			"projctl_v1beta1_pds_w_existing_comp_exp_results.yaml",
+			"appstudio_v1alpha1_comp.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pdst_w_existing_comp.yaml",
+			"projctl_v1beta1_pds_w_existing_comp.yaml",
+		),
 	)
 })
 
@@ -185,7 +194,7 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 
 	emdm := emd.(map[string]interface{})
 	nmd := make(map[string]interface{})
-	for _, key := range []string{"ownerReferences", "annotations", "labels", "name", "namespace"} {
+	for _, key := range []string{"ownerReferences", "annotations", "labels", "name", "namespace", "finalizers"} {
 		if v, ok := emdm[key]; ok {
 			nmd[key] = v
 		}

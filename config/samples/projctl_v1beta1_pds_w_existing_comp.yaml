@@ -1,0 +1,11 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-sample-w-existing-comp
+spec:
+  project: project-sample
+  template:
+    name: pdst-sample-w-existing-comp
+    values:
+    - name: version
+      value: "5.5.0"
