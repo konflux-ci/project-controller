@@ -67,4 +67,21 @@ var _ = DescribeTable(
 			"key2": "{{.baz}}",
 		},
 	),
+	Entry(
+		"and pathes that end with [] point to lists, all members are applied",
+		map[string]any{
+			"key1": []any{
+				"{{.foo}}",
+				"{{.baz}}",
+			},
+		},
+		[]string{"key1", "[]"},
+		someValues,
+		map[string]any{
+			"key1": []any{
+				"bar",
+				"bal",
+			},
+		},
+	),
 )
