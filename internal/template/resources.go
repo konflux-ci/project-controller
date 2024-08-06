@@ -203,18 +203,7 @@ func applyResourceTemplate(
 	templateVarValues map[string]string,
 ) error {
 	for _, path := range templateAbleFields {
-		valueTemplate, ok, err := unstructured.NestedString(resource.Object, path...)
-		if err != nil {
-			return fmt.Errorf("error reading resource template: %s", err)
-		}
-		if !ok {
-			continue
-		}
-		value, err := executeTemplate(valueTemplate, templateVarValues)
-		if err != nil {
-			return fmt.Errorf("error applying resource template: %s", err)
-		}
-		err = unstructured.SetNestedField(resource.Object, value, path...)
+		err := applyFieldTemplate(resource.Object, path, templateVarValues)
 		if err != nil {
 			return fmt.Errorf("error applying resource template: %s", err)
 		}
