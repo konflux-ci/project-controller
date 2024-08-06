@@ -221,18 +221,19 @@ func validateResourceNameFields(
 	nameFields [][]string,
 ) error {
 	for _, path := range nameFields {
-		value, ok, err := unstructured.NestedString(resource.Object, path...)
-		if err != nil || !ok {
-			// We just ignore field reading errors, we'll deal with them elsewhere
-			continue
-		}
-		if !nameFieldPattern.MatchString(value) {
-			return fmt.Errorf(
-				"invalid resource name value '%s' for resource field '%s'. "+
-					"Consider using the 'hyphenize' template function",
-				value,
-				strings.Join(path, "."),
-			)
+		err := applyFieldFunc(resource.Object, path, func(value string) (string, bool, error) {
+			if !nameFieldPattern.MatchString(value) {
+				return "", false, fmt.Errorf(
+					"invalid resource name value '%s' for resource field '%s'. "+
+						"Consider using the 'hyphenize' template function",
+					value,
+					strings.Join(path, "."),
+				)
+			}
+			return "", false, nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 	return nil
