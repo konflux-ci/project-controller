@@ -52,6 +52,9 @@ spec:
       dockerfileUrl: "Dockerfile"
       revision: "1.0.0"
       url: git@github.com:example/comp1.git
+  build-nudges-ref:
+  - "cool-comp2-1-0-0"
+  - "other-comp"
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component

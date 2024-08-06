@@ -61,6 +61,7 @@ var supportedResourceTypes = []struct {
 			{"metadata", "name"},
 			{"spec", "application"},
 			{"spec", "componentName"},
+			{"spec", "build-nudges-ref", "[]"},
 		},
 		templateAbleFields: [][]string{
 			{"spec", "source", "git", "context"},
