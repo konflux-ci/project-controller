@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"text/template"
 
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	"github.com/konflux-ci/project-controller/internal/ownership"
@@ -62,6 +61,7 @@ var supportedResourceTypes = []struct {
 			{"metadata", "name"},
 			{"spec", "application"},
 			{"spec", "componentName"},
+			{"spec", "build-nudges-ref", "[]"},
 		},
 		templateAbleFields: [][]string{
 			{"spec", "source", "git", "context"},
@@ -178,7 +178,7 @@ func MkResources(
 	for i, unstructuredObj := range pdst.Spec.Resources {
 		if unhandledTemplates[i] {
 			return nil, fmt.Errorf(
-				"Unsupported resource type in template: %s",
+				"unsupported resource type in template: %s",
 				unstructuredObj.GroupVersionKind(),
 			)
 		}
@@ -204,20 +204,9 @@ func applyResourceTemplate(
 	templateVarValues map[string]string,
 ) error {
 	for _, path := range templateAbleFields {
-		valueTemplate, ok, err := unstructured.NestedString(resource.Object, path...)
+		err := applyFieldTemplate(resource.Object, path, templateVarValues)
 		if err != nil {
-			return fmt.Errorf("Error reading resource template: %s", err)
-		}
-		if !ok {
-			continue
-		}
-		value, err := executeTemplate(valueTemplate, templateVarValues)
-		if err != nil {
-			return fmt.Errorf("Error applying resource template: %s", err)
-		}
-		err = unstructured.SetNestedField(resource.Object, value, path...)
-		if err != nil {
-			return fmt.Errorf("Error applying resource template: %s", err)
+			return fmt.Errorf("error applying resource template: %s", err)
 		}
 	}
 	return nil
@@ -233,18 +222,19 @@ func validateResourceNameFields(
 	nameFields [][]string,
 ) error {
 	for _, path := range nameFields {
-		value, ok, err := unstructured.NestedString(resource.Object, path...)
-		if err != nil || !ok {
-			// We just ignore field reading errors, we'll deal with them elsewhere
-			continue
-		}
-		if !nameFieldPattern.MatchString(value) {
-			return fmt.Errorf(
-				"Invalid resource name value '%s' for resource field '%s'. "+
-					"Consider using the 'hyphenize' template function",
-				value,
-				strings.Join(path, "."),
-			)
+		err := applyFieldFunc(resource.Object, path, func(value string) (string, bool, error) {
+			if !nameFieldPattern.MatchString(value) {
+				return "", false, fmt.Errorf(
+					"invalid resource name value '%s' for resource field '%s'. "+
+						"Consider using the 'hyphenize' template function",
+					value,
+					strings.Join(path, "."),
+				)
+			}
+			return "", false, nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -272,31 +262,11 @@ func getVarValues(
 			values[variable.Name] = value
 		} else {
 			err = fmt.Errorf(
-				"Template variable '%s' is missing a value and default not defined",
+				"template variable '%s' is missing a value and default not defined",
 				variable.Name,
 			)
 			break
 		}
 	}
 	return
-}
-
-var nameFieldInvalidCharPattern = regexp.MustCompile("[^a-z0-9]")
-var templateFuncs = template.FuncMap{
-	"hyphenize": func(str string) string {
-		return nameFieldInvalidCharPattern.ReplaceAllString(str, "-")
-	},
-}
-
-// Execute the template given as a string and return the result as a string
-func executeTemplate(templateStr string, values map[string]string) (string, error) {
-	theTemplate, err := template.New("").Funcs(templateFuncs).Parse(templateStr)
-	if err != nil {
-		return "", err
-	}
-	var valueBuf strings.Builder
-	if err := theTemplate.Execute(&valueBuf, values); err != nil {
-		return "", err
-	}
-	return valueBuf.String(), nil
 }

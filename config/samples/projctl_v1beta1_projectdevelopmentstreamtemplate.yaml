@@ -62,6 +62,9 @@ spec:
           dockerfileUrl: "{{.cool_comp1_dockerfileUrl}}"
           revision: "{{.cool_comp1_revision}}"
           url: git@github.com:example/comp1.git
+      build-nudges-ref:
+      - "cool-comp2-{{.versionName}}"
+      - "other-comp"
 
   - apiVersion: appstudio.redhat.com/v1alpha1
     kind: Component

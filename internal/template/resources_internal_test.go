@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apischema "k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/gertd/go-pluralize"
@@ -87,5 +88,61 @@ var _ = Describe("Resources", func() {
 				allAPIsWFinAccessNdedEntries,
 			)
 		})
+	})
+
+	Describe("validateResourceNameFields", func() {
+		var res *unstructured.Unstructured
+
+		BeforeEach(func() {
+			res = &unstructured.Unstructured{
+				Object: map[string]any{
+					"key1": map[string]any{
+						"key1a": "good-name",
+						"key1b": []any{
+							"good-name1",
+							"good-name2",
+						},
+					},
+					"key2": map[string]any{
+						"key2a": "bad.name",
+						"key2b": []any{
+							"good-name1",
+							"bad.name2",
+						},
+					},
+				},
+			}
+		})
+
+		DescribeTable(
+			"it ensures good k8s name values in specified field paths",
+			func(nameFields [][]string) {
+				Expect(validateResourceNameFields(res, nameFields)).To(Succeed())
+			},
+			Entry("checks string fields", [][]string{{"key1", "key1a"}}),
+			Entry("checks slice-of-strings fields", [][]string{{"key1", "key1b", "[]"}}),
+		)
+
+		DescribeTable(
+			"it finds bad k8s name values in specified field paths",
+			func(nameFields [][]string) {
+				Expect(validateResourceNameFields(res, nameFields)).ToNot(Succeed())
+			},
+			Entry("checks string fields", [][]string{
+				{"key2", "key2a"},
+			}),
+			Entry("can check multiple string fields", [][]string{
+				{"key1", "key1a"},
+				{"key2", "key2a"},
+			}),
+			Entry("checks slice-of-strings fields", [][]string{
+				{"key2", "key2b", "[]"},
+			}),
+			Entry("can check multiple fields of different types", [][]string{
+				{"key1", "key1a"},
+				{"key2", "key2b", "[]"},
+				{"key2", "key2a"},
+			}),
+		)
 	})
 })
