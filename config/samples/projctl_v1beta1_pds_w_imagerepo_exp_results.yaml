@@ -57,5 +57,6 @@ metadata:
 spec:
   image:
     visibility: public
+    name: coolorg/cool-app-2-2-0/cool-comp1-2-2-0
   credentials:
     verify-linking: true
