@@ -43,5 +43,6 @@ spec:
     spec:
       image:
         visibility: public
+        name: coolorg/cool-app-{{.versionName}}/cool-comp1-{{.versionName}}
       credentials:
         verify-linking: true
