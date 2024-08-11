@@ -82,6 +82,8 @@ var supportedResourceTypes = []struct {
 			{"metadata", "name"},
 			{"metadata", "labels", "appstudio.redhat.com/component"},
 			{"metadata", "labels", "appstudio.redhat.com/application"},
+		},
+		templateAbleFields: [][]string{
 			{"spec", "image", "name"},
 		},
 		ownerNameField: []string{"metadata", "labels", "appstudio.redhat.com/component"},
