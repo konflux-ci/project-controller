@@ -13,7 +13,7 @@ metadata:
     appstudio.openshift.io/component: project-controller
     pipelines.appstudio.openshift.io/type: build
   name: project-controller-on-push
-  namespace: rhtap-o11y-tenant
+  namespace: konflux-vanguard-tenant
 spec:
   params:
   - name: dockerfile
@@ -21,7 +21,7 @@ spec:
   - name: git-url
     value: '{{source_url}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/rhtap-o11y-tenant/project-controller/project-controller:{{revision}}
+    value: quay.io/redhat-user-workloads/konflux-vanguard-tenant/project-controller/project-controller:{{revision}}
   - name: path-context
     value: .
   - name: revision
