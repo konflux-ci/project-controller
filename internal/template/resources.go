@@ -98,9 +98,12 @@ var supportedResourceTypes = []struct {
 		templateAbleNameFields: [][]string{
 			{"metadata", "name"},
 			{"spec", "application"},
-			// TODO: Somehow allow templating spec.params and spec.resolverRef.params
-			// which are arrays of name/value pairs. This would require changes to
+			// TODO: allow templating of spec.params
+			// which is an array of name/value pairs. This would require changes to
 			// applyResourceTemplate and possibly validateResourceNameFields
+		},
+		templateAbleFields: [][]string{
+			{"spec", "resolverRef", "params", "[]", "value"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
