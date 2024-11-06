@@ -34,6 +34,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -56,6 +57,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var saClient client.Client
 var testEnv *envtest.Environment
+var k8sCluster cluster.Cluster
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -125,6 +127,10 @@ var _ = BeforeSuite(func() {
 	saClient, err = client.New(saCfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
 	Expect(saClient).NotTo(BeNil())
+
+	k8sCluster, err = cluster.New(cfg)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(k8sCluster).NotTo(BeNil())
 })
 
 var _ = AfterSuite(func() {

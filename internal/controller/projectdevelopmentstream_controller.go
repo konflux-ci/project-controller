@@ -18,10 +18,12 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -31,12 +33,15 @@ import (
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
 	"github.com/konflux-ci/project-controller/internal/ownership"
 	"github.com/konflux-ci/project-controller/internal/template"
+	"github.com/konflux-ci/project-controller/pkg/logr/eventr"
+	"github.com/konflux-ci/project-controller/pkg/logr/muxr"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
 type ProjectDevelopmentStreamReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=projctl.konflux.dev,resources=projectdevelopmentstreams,verbs=get;list;watch;create;update;patch;delete
@@ -71,6 +76,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	log = log.WithValues("PDS name", pds.ObjectMeta.Name)
+	log = muxr.NewMuxLogger(log, eventr.NewEventr(r.Recorder, &pds))
 
 	// This is arguably better done in an admission hook, but its easier to test
 	// when doing this from the controller
@@ -102,7 +108,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	log.Info("Applying resources from ProjectDevelopmentStreamTemplate")
+	log.Info(fmt.Sprintf("Applying resources from ProjectDevelopmentStreamTemplate: %s", pdst.Name))
 	resources, err := template.MkResources(pds, pdst)
 	if err != nil {
 		log.Error(err, "Failed to generate resources from template")
@@ -118,7 +124,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			"kind", resource.GetKind(),
 			"name", resource.GetName(),
 		)
-		log.Info("Creating/Updating resource")
+		log.V(1).Info("Creating/Updating resource")
 		ownership.AddMissingUIDs(ctx, r.Client, resource)
 		if len(resource.GetOwnerReferences()) <= 0 {
 			// If the resource does not have an owner set, use the PDS
@@ -136,10 +142,10 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
 	err := r.Client.Patch(ctx, resource, client.Apply, client.FieldOwner("projctl.konflux.dev"), client.ForceOwnership)
 	if err != nil {
-		log.Error(err, "Failed to create or update resource")
+		log.Error(err, fmt.Sprintf("Failed to create or update resource: %s [%s]", resource.GetName(), resource.GetKind()))
 		return apierrors.IsConflict(err)
 	}
-	log.Info("Resource updated")
+	log.Info(fmt.Sprintf("Resource updated: %s [%s]", resource.GetName(), resource.GetKind()))
 	return false
 }
 
