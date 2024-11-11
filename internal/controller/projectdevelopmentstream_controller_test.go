@@ -65,7 +65,7 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				controllerReconciler := &ProjectDevelopmentStreamReconciler{
 					Client:   saClient,
 					Scheme:   saClient.Scheme(),
-					Recorder: k8sCluster.GetEventRecorderFor("ProjectDevelopmentStream-controller-tests"),
+					Recorder: saCluster.GetEventRecorderFor("ProjectDevelopmentStream-controller-tests"),
 				}
 
 				By("Setting the owner reference")

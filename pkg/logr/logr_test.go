@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
+	"github.com/onsi/gomega/types"
 )
 
 var _ = Describe("Logr", func() {
@@ -25,9 +26,7 @@ var _ = Describe("Logr", func() {
 		format.UseStringerRepresentation = true
 		expectOutputsMatch = func(lines ...string) {
 			GinkgoHelper()
-			Expect(outputs).Should(HaveEach(MatchRegexp(
-				fmt.Sprintf("^%s\n$", strings.Join(lines, "\n")),
-			)))
+			Expect(outputs).Should(HaveEach(matchRegexpLines(lines...)))
 		}
 	})
 
@@ -140,10 +139,37 @@ var _ = Describe("Logr", func() {
 		})
 
 		ImplementsLogrBehaviour()
+
+		It("Supports loggers with different verbosity", func() {
+			var b1, b2 *strings.Builder
+			var l1, l2 logr.Logger
+			l1, b1 = stringsBuilderLogrV(1)
+			l2, b2 = stringsBuilderLogrV(0)
+			outputs = []fmt.Stringer{b1, b2}
+
+			logger = muxr.NewMuxLogger(l1, l2)
+
+			logger.Info("l0 msg")
+			logger.V(1).Info("l1 msg")
+
+			Expect(outputs).To(HaveExactElements(
+				matchRegexpLines(
+					` "ts"="[0-9 :\-\.]+" "level"=0 "msg"="l0 msg"`,
+					` "ts"="[0-9 :\-\.]+" "level"=1 "msg"="l1 msg"`,
+				),
+				matchRegexpLines(
+					` "ts"="[0-9 :\-\.]+" "level"=0 "msg"="l0 msg"`,
+				),
+			))
+		})
 	})
 })
 
 func stringsBuilderLogr() (logr.Logger, *strings.Builder) {
+	return stringsBuilderLogrV(1)
+}
+
+func stringsBuilderLogrV(verbosity int) (logr.Logger, *strings.Builder) {
 	builder := strings.Builder{}
 	logger := funcr.New(func(prefix, args string) {
 		builder.WriteString(prefix)
@@ -154,7 +180,7 @@ func stringsBuilderLogr() (logr.Logger, *strings.Builder) {
 		LogCaller:     funcr.Error,
 		LogCallerFunc: false,
 		LogTimestamp:  true,
-		Verbosity:     1,
+		Verbosity:     verbosity,
 	})
 	return logger, &builder
 }
@@ -164,4 +190,10 @@ func previousLineCaller() string {
 	caller := fmt.Sprintf(`{"file"="%s" "line"=%d}`, filepath.Base(f), l-1)
 	Expect(ok).To(BeTrue())
 	return caller
+}
+
+func matchRegexpLines(lines ...string) types.GomegaMatcher {
+	return MatchRegexp(
+		fmt.Sprintf("^%s\n$", strings.Join(lines, "\n")),
+	)
 }
