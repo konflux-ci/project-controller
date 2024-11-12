@@ -4,17 +4,14 @@ import "github.com/go-logr/logr"
 
 // A multiplexing logr implementation
 
-type muxr []logr.LogSink
+type muxr []logr.Logger
 
 func NewMuxLogger(loggers ...logr.Logger) logr.Logger {
 	theMuxr := make(muxr, 0, len(loggers))
 	for i := range loggers {
-		sink := loggers[i].GetSink()
-		if sinkWCallDepth, ok := sink.(logr.CallDepthLogSink); ok {
-			// Skip the muxr methods when looking up caller info
-			sink = sinkWCallDepth.WithCallDepth(1)
-		}
-		theMuxr = append(theMuxr, sink)
+		// We skip 2 call stack frames because the Logger is calling our sink
+		// which then calls the underlying logger.
+		theMuxr = append(theMuxr, loggers[i].WithCallDepth(2))
 	}
 	return logr.Logger{}.WithSink(theMuxr)
 }
@@ -23,21 +20,21 @@ func NewMuxLogger(loggers ...logr.Logger) logr.Logger {
 var _ logr.CallDepthLogSink = muxr{}
 
 func (mx muxr) Init(info logr.RuntimeInfo) {
-	for _, m := range mx {
-		m.Init(info)
+	for i := range mx {
+		mx[i].GetSink().Init(info)
 	}
 }
 
 func (mx muxr) Enabled(level int) (ena bool) {
-	for _, m := range mx {
-		ena = ena || m.Enabled(level)
+	for i := range mx {
+		ena = ena || mx[i].GetSink().Enabled(level)
 	}
 	return
 }
 
 func (mx muxr) Info(level int, msg string, keysAndValues ...any) {
 	for _, m := range mx {
-		m.Info(level, msg, keysAndValues...)
+		m.V(level-m.GetV()).Info(msg, keysAndValues...)
 	}
 }
 
@@ -66,9 +63,7 @@ func (mx muxr) WithName(name string) logr.LogSink {
 func (mx muxr) WithCallDepth(depth int) logr.LogSink {
 	newMuxr := make(muxr, 0, len(mx))
 	for _, m := range mx {
-		if mWCallDepth, ok := m.(logr.CallDepthLogSink); ok {
-			m = mWCallDepth.WithCallDepth(depth)
-		}
+		m = m.WithCallDepth(depth)
 		newMuxr = append(newMuxr, m)
 	}
 	return newMuxr

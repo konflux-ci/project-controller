@@ -56,8 +56,8 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var saClient client.Client
+var saCluster cluster.Cluster
 var testEnv *envtest.Environment
-var k8sCluster cluster.Cluster
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -128,9 +128,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(saClient).NotTo(BeNil())
 
-	k8sCluster, err = cluster.New(cfg)
+	saCluster, err = cluster.New(saCfg)
 	Expect(err).NotTo(HaveOccurred())
-	Expect(k8sCluster).NotTo(BeNil())
+	Expect(saCluster).NotTo(BeNil())
 })
 
 var _ = AfterSuite(func() {
