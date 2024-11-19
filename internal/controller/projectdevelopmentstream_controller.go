@@ -27,7 +27,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/go-logr/logr"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
@@ -180,9 +182,40 @@ func (r *ProjectDevelopmentStreamReconciler) setProductOwnerRef(ctx context.Cont
 	return r.Client.Update(ctx, pds)
 }
 
+// Returns a handler for collecting all dev streams that exist on the same namespace as
+// the object passed to the handler
+func getSameNSEventHandler(r *ProjectDevelopmentStreamReconciler) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(
+		func(ctx context.Context, o client.Object) []reconcile.Request {
+			lg := log.FromContext(ctx)
+
+			// get all streams from current namespace
+			list := projctlv1beta1.ProjectDevelopmentStreamList{}
+			if err := r.Client.List(ctx, &list, client.InNamespace(o.GetNamespace())); err != nil {
+				lg.Error(err, "Failed listing dev streams in namespace")
+				return nil
+			}
+			ret := make([]reconcile.Request, len(list.Items))
+
+			for i := range list.Items {
+				ret[i] = reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&list.Items[i])}
+			}
+			return ret
+		},
+	)
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *ProjectDevelopmentStreamReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&projctlv1beta1.ProjectDevelopmentStream{}).
+		Watches(
+			&projctlv1beta1.ProjectDevelopmentStreamTemplate{},
+			getSameNSEventHandler(r),
+		).
+		Watches(
+			&projctlv1beta1.Project{},
+			getSameNSEventHandler(r),
+		).
 		Complete(r)
 }
