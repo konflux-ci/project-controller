@@ -169,3 +169,13 @@ likely to be resolved in the future.
   referring to may be changed. In both those cases, resources owned by the
   *ProjectDevelopmentStream* but not defined by the new template do not get
   deleted.
+
+## Troubleshooting 
+
+* When a *ProjectDevelopmentStream* that refers to a
+  *ProjectDevelopmentStreamTemplate* is created or modified, and the resources
+  defined by the template fail to be created, the issues with the template
+  application process may be seen by inspecting the Events associated with the
+  *ProjectDevelopmentStream* object. The events can be seen by running the
+   `kubectl describe` or `oc describe` commands on the
+  *ProjectDevelopmentStream* resource.
