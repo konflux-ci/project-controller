@@ -1,0 +1,17 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  name: pdst-sample-w-app
+spec:
+  project: project-sample
+  variables:
+  - name: version
+    description: A version number for the new development stream
+
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "cool-app-{{hyphenize .version}}"
+    spec:
+      displayName: "Cool App {{.version}}"
