@@ -104,6 +104,7 @@ metadata:
     release.appstudio.openshift.io/author: system_serviceaccount_remote-argocd_remote-argocd
     release.appstudio.openshift.io/auto-release: 'true'
     release.appstudio.openshift.io/standing-attribution: 'true'
+    release.appstudio.openshift.io/releasePlanAdmission: cool-rpa-4-4-0
 spec:
   application: "cool-app-4-4-0"
   releaseGracePeriodDays: 7
