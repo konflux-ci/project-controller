@@ -118,6 +118,7 @@ var supportedResourceTypes = []struct {
 		},
 		templateAbleNameFields: [][]string{
 			{"metadata", "name"},
+			{"metadata", "labels", "release.appstudio.openshift.io/releasePlanAdmission"},
 			{"spec", "application"},
 		},
 		ownerNameField: []string{"spec", "application"},
