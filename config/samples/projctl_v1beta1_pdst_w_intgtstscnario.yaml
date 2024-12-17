@@ -57,6 +57,8 @@ spec:
       contexts:
         - description: Application testing
           name: application
+        - description: Application testing for cool-app-{{.versionName}}
+          name: component_cool-app-{{.versionName}}
       params:
         - name: POLICY_CONFIGURATION
           value: rhtap-releng-tenant/app-interface-standard

@@ -77,6 +77,8 @@ spec:
   contexts:
     - description: Application testing
       name: application
+    - description: Application testing for cool-app-3-3-0
+      name: component_cool-app-3-3-0
   params:
     - name: POLICY_CONFIGURATION
       value: rhtap-releng-tenant/app-interface-standard
