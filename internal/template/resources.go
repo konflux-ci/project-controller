@@ -62,6 +62,7 @@ var supportedResourceTypes = []struct {
 			{"spec", "application"},
 			{"spec", "componentName"},
 			{"spec", "build-nudges-ref", "[]"},
+			{"metadata", "annotations", "mintmaker.appstudio.redhat.com/disabled"},
 		},
 		templateAbleFields: [][]string{
 			{"spec", "source", "git", "context"},

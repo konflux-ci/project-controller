@@ -19,6 +19,8 @@ spec:
     values:
     - name: version
       value: "1.0.0"
+    - name: mintmaker_disable
+      value: "false"
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Application
@@ -39,6 +41,7 @@ metadata:
   name: "cool-comp1-1-0-0"
   annotations:
     pvc.konflux.dev/cloned-from: cool_comp1_main
+    mintmaker.appstudio.redhat.com/disabled: "false"
   ownerReferences:
   - apiVersion: "appstudio.redhat.com/v1alpha1"
     kind: "Application"
