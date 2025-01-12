@@ -15,3 +15,5 @@ spec:
     values:
     - name: version
       value: "1.0.0"
+    - name: mintmaker_disable
+      value: "false"

@@ -37,6 +37,10 @@ spec:
     defaultValue: fixed-rev
     description: Git revision for cool-comp2 component
 
+  - name: mintmaker_disable
+    defaultValue: "true"
+    description: annotation for mintmaker to disable updates for component
+
   resources:
   - apiVersion: appstudio.redhat.com/v1alpha1
     kind: Application
@@ -53,6 +57,7 @@ spec:
       name: "cool-comp1-{{.versionName}}"
       annotations:
         pvc.konflux.dev/cloned-from: cool_comp1_main
+        mintmaker.appstudio.redhat.com/disabled: "{{.mintmaker_disable}}"
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"
