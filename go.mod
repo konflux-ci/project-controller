@@ -8,7 +8,7 @@ require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.4.2
 	github.com/konflux-ci/application-api v0.0.0-20240527211352-be061932d497
-	github.com/konflux-ci/image-controller v0.0.0-20240712153454-e138500d2d42
+	github.com/konflux-ci/image-controller v0.0.0-20250213125804-b48fd1df8e8c
 	github.com/konflux-ci/integration-service v0.0.0-20240718111237-cc6e6254cbe9
 	github.com/konflux-ci/release-service v0.0.0-20240514150425-d25d533f66ba
 	github.com/onsi/ginkgo/v2 v2.22.2
