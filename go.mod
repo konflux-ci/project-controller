@@ -13,14 +13,14 @@ require (
 	github.com/konflux-ci/release-service v0.0.0-20250302183050-e4828604295f
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
-	k8s.io/api v0.32.2
-	k8s.io/apimachinery v0.32.2
+	k8s.io/api v0.32.3
+	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v1.5.2
 	sigs.k8s.io/controller-runtime v0.19.4
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
-replace k8s.io/client-go => k8s.io/client-go v0.32.2
+replace k8s.io/client-go => k8s.io/client-go v0.32.3
 
 require (
 	cel.dev/expr v0.19.1 // indirect
