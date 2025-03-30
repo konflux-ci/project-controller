@@ -244,8 +244,8 @@ github.com/konflux-ci/integration-service v0.0.0-20250227154957-2b69610bd5e9 h1:
 github.com/konflux-ci/integration-service v0.0.0-20250227154957-2b69610bd5e9/go.mod h1:11zBYcaBS6sT+BDvJa9GlNk4/jSC0Y2Tz+OK+L2Grvg=
 github.com/konflux-ci/operator-toolkit v0.0.0-20240402130556-ef6dcbeca69d h1:z7j3mglNoXvIrw5Vz/Ul+izoITRaqYURPIWrFoEyHgI=
 github.com/konflux-ci/operator-toolkit v0.0.0-20240402130556-ef6dcbeca69d/go.mod h1:AcChx7FjpYSIkDvQgaUKyauuF0PXm3ivB5MqZSC9Eis=
-github.com/konflux-ci/release-service v0.0.0-20250302183050-e4828604295f h1:7Z3cVYTJB4KhHh+t28Xz8OxnOL8zs9knn2rO8ow91Uc=
-github.com/konflux-ci/release-service v0.0.0-20250302183050-e4828604295f/go.mod h1:jGJN1yF0FgXmAH5PLG+cFnUBbCqgqhAA9ZYdM59HbJo=
+github.com/konflux-ci/release-service v0.0.0-20250327223406-2579fedcbd81 h1:UsQDMtyYo3i3bV1v+T7Zt7HrB74YA9IDmA4tqEkxJkc=
+github.com/konflux-ci/release-service v0.0.0-20250327223406-2579fedcbd81/go.mod h1:pkhjG4yBFmzUwNJGOBbRMuNU4qzxAxZqtyd94DNIT0g=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
