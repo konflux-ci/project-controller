@@ -15,7 +15,7 @@ require (
 	github.com/onsi/gomega v1.36.2
 	k8s.io/api v0.32.3
 	k8s.io/apimachinery v0.32.3
-	k8s.io/client-go v1.5.2
+	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.19.4
 )
 
