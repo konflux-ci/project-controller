@@ -10,7 +10,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20240812090716-e7eb2ecfb409
 	github.com/konflux-ci/image-controller v0.0.0-20250313165928-e6c831cd47e9
 	github.com/konflux-ci/integration-service v0.0.0-20250227154957-2b69610bd5e9
-	github.com/konflux-ci/release-service v0.0.0-20250327223406-2579fedcbd81
+	github.com/konflux-ci/release-service v0.0.0-20250411123141-c5a0a7bd154b
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
 	k8s.io/api v0.32.3
@@ -49,7 +49,7 @@ require (
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/cel-go v0.22.0 // indirect
