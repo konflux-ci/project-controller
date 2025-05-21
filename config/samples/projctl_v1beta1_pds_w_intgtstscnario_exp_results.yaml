@@ -80,6 +80,8 @@ spec:
     - description: Application testing for cool-app-3-3-0
       name: component_cool-app-3-3-0
   params:
+    - name: APPLICATION_NAME
+      value: cool-app-3-3-0
     - name: POLICY_CONFIGURATION
       value: rhtap-releng-tenant/app-interface-standard
   resolverRef:
