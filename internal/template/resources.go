@@ -104,6 +104,7 @@ var supportedResourceTypes = []struct {
 			// applyResourceTemplate and possibly validateResourceNameFields
 		},
 		templateAbleFields: [][]string{
+			{"spec", "params", "[]", "value"},
 			{"spec", "resolverRef", "params", "[]", "value"},
 			{"spec", "contexts", "[]", "name"},
 			{"spec", "contexts", "[]", "description"},
