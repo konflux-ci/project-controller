@@ -125,6 +125,9 @@ var supportedResourceTypes = []struct {
 			{"metadata", "labels", "release.appstudio.openshift.io/releasePlanAdmission"},
 			{"spec", "application"},
 		},
+		templateAbleFields: [][]string{
+			{"spec", "data", "releaseNotes", "references", "[]"},
+		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
 			Group: "appstudio.redhat.com", Version: "v1alpha1", Kind: "Application",

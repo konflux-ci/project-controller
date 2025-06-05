@@ -109,3 +109,8 @@ spec:
   application: "cool-app-4-4-0"
   releaseGracePeriodDays: 7
   target: cool-app-releng-tenant
+  data:
+    releaseNotes:
+      description: "Description"
+      references:
+        - "reference 4.4.0"
