@@ -89,3 +89,8 @@ spec:
       application: "cool-app-{{.versionName}}"
       releaseGracePeriodDays: 7
       target: cool-app-releng-tenant
+      data:
+        releaseNotes:
+          description: "Description"
+          references:
+            - "reference {{.version}}"
