@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/konflux-ci/application-api v0.0.0-20240812090716-e7eb2ecfb409
 	github.com/konflux-ci/image-controller v0.0.0-20250313165928-e6c831cd47e9
-	github.com/konflux-ci/integration-service v0.0.0-20250411090242-88a813cfef41
+	github.com/konflux-ci/integration-service v0.0.0-20250605083515-7ca8993ef047
 	github.com/konflux-ci/release-service v0.0.0-20250327223406-2579fedcbd81
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
@@ -21,6 +21,8 @@ require (
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
 replace k8s.io/client-go => k8s.io/client-go v0.32.3
+
+replace github.com/google/cel-go => github.com/google/cel-go v0.22.0
 
 require (
 	cel.dev/expr v0.19.1 // indirect
@@ -100,7 +102,7 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	golang.org/x/time v0.8.0 // indirect
+	golang.org/x/time v0.10.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/api v0.214.0 // indirect
