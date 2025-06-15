@@ -10,7 +10,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20240812090716-e7eb2ecfb409
 	github.com/konflux-ci/image-controller v0.0.0-20250610085320-1a7e09992a13
 	github.com/konflux-ci/integration-service v0.0.0-20250605083515-7ca8993ef047
-	github.com/konflux-ci/release-service v0.0.0-20250327223406-2579fedcbd81
+	github.com/konflux-ci/release-service v0.0.0-20250612135914-9e5496ca607f
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
 	k8s.io/api v0.32.3
