@@ -41,6 +41,8 @@ metadata:
   name: "cool-comp1-1-0-0"
   annotations:
     pvc.konflux.dev/cloned-from: cool_comp1_main
+    git-provider: github
+    git-provider-url: https://github.com
     mintmaker.appstudio.redhat.com/disabled: "false"
   ownerReferences:
   - apiVersion: "appstudio.redhat.com/v1alpha1"

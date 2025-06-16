@@ -36,6 +36,12 @@ spec:
   - name: cool_comp2_revision
     defaultValue: fixed-rev
     description: Git revision for cool-comp2 component
+  - name: cool_git_provider
+    defaultValue: github
+    description: Source Git provider
+  - name: cool_git_provider_url
+    defaultValue: https://github.com
+    description: Source Git provider url
 
   - name: mintmaker_disable
     defaultValue: "true"
@@ -57,6 +63,8 @@ spec:
       name: "cool-comp1-{{.versionName}}"
       annotations:
         pvc.konflux.dev/cloned-from: cool_comp1_main
+        git-provider: "{{.cool_git_provider}}"
+        git-provider-url: "{{.cool_git_provider_url}}"
         mintmaker.appstudio.redhat.com/disabled: "{{.mintmaker_disable}}"
     spec:
       application: "cool-app-{{.versionName}}"
