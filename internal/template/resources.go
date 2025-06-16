@@ -69,6 +69,8 @@ var supportedResourceTypes = []struct {
 			{"spec", "source", "git", "dockerfileUrl"},
 			{"spec", "source", "git", "revision"},
 			{"spec", "source", "git", "url"},
+			{"metadata", "annotations", "git-provider"},
+			{"metadata", "annotations", "git-provider-url"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
