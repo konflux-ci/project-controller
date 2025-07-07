@@ -9,10 +9,10 @@ require (
 	github.com/go-logr/logr v1.4.3
 	github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679
 	github.com/konflux-ci/image-controller v0.0.0-20250703051129-fd6e062ca981
-	github.com/konflux-ci/integration-service v0.0.0-20250629094304-eebda6706a50
+	github.com/konflux-ci/integration-service v0.0.0-20250706140026-f77be61c2330
 	github.com/konflux-ci/release-service v0.0.0-20250704151143-db117ef7767d
-	github.com/onsi/ginkgo/v2 v2.22.2
-	github.com/onsi/gomega v1.36.2
+	github.com/onsi/ginkgo/v2 v2.23.4
+	github.com/onsi/gomega v1.37.0
 	k8s.io/api v0.32.3
 	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v1.5.2
@@ -90,6 +90,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0 // indirect
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
+	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
@@ -101,7 +102,7 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
+	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/api v0.214.0 // indirect
