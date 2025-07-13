@@ -13,14 +13,14 @@ require (
 	github.com/konflux-ci/release-service v0.0.0-20250704151143-db117ef7767d
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
-	k8s.io/api v0.33.1
-	k8s.io/apimachinery v0.33.1
+	k8s.io/api v0.33.2
+	k8s.io/apimachinery v0.33.2
 	k8s.io/client-go v1.5.2
 	sigs.k8s.io/controller-runtime v0.19.4
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
-replace k8s.io/client-go => k8s.io/client-go v0.32.3
+replace k8s.io/client-go => k8s.io/client-go v0.33.2
 
 replace github.com/google/cel-go => github.com/google/cel-go v0.25.0
 
@@ -112,9 +112,9 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.33.1 // indirect
-	k8s.io/apiserver v0.33.1 // indirect
-	k8s.io/component-base v0.33.1 // indirect
+	k8s.io/apiextensions-apiserver v0.33.2 // indirect
+	k8s.io/apiserver v0.33.2 // indirect
+	k8s.io/component-base v0.33.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250701173324-9bd5c66d9911 // indirect
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 // indirect
