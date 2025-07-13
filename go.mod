@@ -2,7 +2,7 @@ module github.com/konflux-ci/project-controller
 
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.24.5
 
 require (
 	github.com/gertd/go-pluralize v0.2.1
