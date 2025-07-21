@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/logr v1.4.3
 	github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679
 	github.com/konflux-ci/image-controller v0.0.0-20250711100205-c636a2250cec
-	github.com/konflux-ci/integration-service v0.0.0-20250711172206-a0cf1f71a0f6
+	github.com/konflux-ci/integration-service v0.0.0-20250720070758-da7371b27dba
 	github.com/konflux-ci/release-service v0.0.0-20250713070602-e27d13b39e2e
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
