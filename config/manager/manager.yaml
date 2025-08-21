@@ -69,7 +69,7 @@ spec:
       - command:
         - /manager
         args:
-        - --leader-elect
+        - --leader-elect=false
         - --health-probe-bind-address=:8081
         - --metrics-secure=true
         image: controller:latest
