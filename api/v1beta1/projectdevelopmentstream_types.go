@@ -25,6 +25,7 @@ import (
 
 // Provide a value for a variable specified in an associated
 // ProjectDevelopmentStreamTemplate
+// Use values to customize generated resources per development stream.
 type ProjectDevelopmentStreamSpecTemplateValue struct {
 	// The name of the template variable to provide a value for
 	Name string `json:"name"`
@@ -34,6 +35,7 @@ type ProjectDevelopmentStreamSpecTemplateValue struct {
 
 // ProjectDevelopmentStreamSpecTemplateRef defines which optional template is
 // associated with this ProjectDevelopmentStream and how to apply it
+// The template must exist in the same namespace as the stream.
 type ProjectDevelopmentStreamSpecTemplateRef struct {
 	// The name of the ProjectDevelopmentStreamTemplate to use
 	Name string `json:"name"`
@@ -42,6 +44,7 @@ type ProjectDevelopmentStreamSpecTemplateRef struct {
 }
 
 // ProjectDevelopmentStreamSpec defines the desired state of ProjectDevelopmentStream
+// A development stream typically represents a version or environment branch.
 type ProjectDevelopmentStreamSpec struct {
 	// The name of the project this stream belongs to
 	Project string `json:"project,omitempty"`
@@ -51,6 +54,9 @@ type ProjectDevelopmentStreamSpec struct {
 }
 
 // ProjectDevelopmentStreamStatus defines the observed state of ProjectDevelopmentStream
+// Conditions include:
+// - TemplateApplied (reasons: Success, TemplateNotFound, VariableError, ResourceError, ProcessingError)
+// - TemplateGenerated (reasons: Success, TemplateError, VariableValidationFailed, ResourceValidationFailed)
 type ProjectDevelopmentStreamStatus struct {
 	// Represents the observations of a ProjectDevelopmentStream's current state.
 	// Known .status.conditions.type are: "TemplateApplied", and "TemplateGenerated"
@@ -64,7 +70,8 @@ type ProjectDevelopmentStreamStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// ProjectDevelopmentStream is the Schema for the projectdevelopmentstreams API
+// ProjectDevelopmentStream represents an independent stream of development.
+// No custom labels or annotations on the object alter controller behavior.
 type ProjectDevelopmentStream struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

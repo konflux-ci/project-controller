@@ -30,6 +30,7 @@ type UnstructuredObj struct {
 }
 
 // Settings for a variable to be used to customize the template results
+// Variables are processed in order; later defaults can reference earlier variables.
 type ProjectDevelopmentStreamTemplateVariable struct {
 	// Variable name
 	Name string `json:"name"`
@@ -43,6 +44,7 @@ type ProjectDevelopmentStreamTemplateVariable struct {
 
 // ProjectDevelopmentStreamTemplateSpec defines the resources to be generated
 // using a ProjectDevelopmentStreamTemplate
+// Resources can interpolate variables (e.g., {{.version}}) and functions like hyphenize.
 type ProjectDevelopmentStreamTemplateSpec struct {
 	// The name of the project this stream template belongs to
 	Project string `json:"project,omitempty"`
@@ -59,7 +61,9 @@ type ProjectDevelopmentStreamTemplateSpec struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// ProjectDevelopmentStreamTemplate is the Schema for the projectdevelopmentstreamtemplates API
+// ProjectDevelopmentStreamTemplate defines a reusable set of resources
+// that a ProjectDevelopmentStream can instantiate using variable values.
+// No custom labels or annotations on the object alter controller behavior.
 type ProjectDevelopmentStreamTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

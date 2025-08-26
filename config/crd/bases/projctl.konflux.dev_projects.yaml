@@ -17,7 +17,9 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Project is the Schema for the projects API
+        description: |-
+          Project represents a Konflux project for organizing related development streams.
+          No custom labels or annotations on Project alter controller behavior.
         properties:
           apiVersion:
             description: |-
@@ -37,7 +39,9 @@ spec:
           metadata:
             type: object
           spec:
-            description: ProjectSpec defines the desired state of Project
+            description: |-
+              ProjectSpec defines the desired state of a Project.
+              A Project groups related development streams and provides metadata for display.
             properties:
               description:
                 description: A text describing the project, its purpose, etc.
