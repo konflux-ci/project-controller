@@ -17,8 +17,10 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: ProjectDevelopmentStreamTemplate is the Schema for the projectdevelopmentstreamtemplates
-          API
+        description: |-
+          ProjectDevelopmentStreamTemplate defines a reusable set of resources
+          that a ProjectDevelopmentStream can instantiate using variable values.
+          No custom labels or annotations on the object alter controller behavior.
         properties:
           apiVersion:
             description: |-
@@ -41,6 +43,7 @@ spec:
             description: |-
               ProjectDevelopmentStreamTemplateSpec defines the resources to be generated
               using a ProjectDevelopmentStreamTemplate
+              Resources can interpolate variables (e.g., {{.version}}) and functions like hyphenize.
             properties:
               project:
                 description: The name of the project this stream template belongs
@@ -61,8 +64,9 @@ spec:
                   variables in the list is significant as earlier variables can be
                   referenced by the default values for later variables
                 items:
-                  description: Settings for a variable to be used to customize the
-                    template results
+                  description: |-
+                    Settings for a variable to be used to customize the template results
+                    Variables are processed in order; later defaults can reference earlier variables.
                   properties:
                     defaultValue:
                       description: |-

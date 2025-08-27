@@ -23,7 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ProjectSpec defines the desired state of Project
+// ProjectSpec defines the desired state of a Project.
+// A Project groups related development streams and provides metadata for display.
 type ProjectSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -39,7 +40,8 @@ type ProjectSpec struct {
 
 //+kubebuilder:object:root=true
 
-// Project is the Schema for the projects API
+// Project represents a Konflux project for organizing related development streams.
+// No custom labels or annotations on Project alter controller behavior.
 type Project struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
