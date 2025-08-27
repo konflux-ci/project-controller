@@ -15,6 +15,7 @@ metadata:
     appstudio.openshift.io/application: project-controller
     appstudio.openshift.io/component: project-controller
     pipelines.appstudio.openshift.io/type: build
+    release.appstudio.openshift.io/auto-release: "false"
   name: project-controller-on-pull-request
   namespace: konflux-vanguard-tenant
 spec:
