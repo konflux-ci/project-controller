@@ -24,7 +24,8 @@ spec:
     metadata:
       name: "cool-comp1-{{.versionName}}"
       annotations:
-        applicationFailCounter: "0"      
+        applicationFailCounter: "0"
+        appstudio.openshift.io/request: "configure-pac"
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"

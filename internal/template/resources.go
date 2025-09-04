@@ -32,6 +32,9 @@ var supportedResourceTypes = []struct {
 	// For such fields an error will be reported if the generated value does not
 	// match ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
 	templateAbleNameFields [][]string
+	// Fields that should not be touched when applying templates. These fields
+	// will be preserved from existing resources and not created in new resources.
+	untouchableFields [][]string
 	// A field of the resource that points to its owner object. If nil, an
 	// owner record would not be set.
 	ownerNameField []string
@@ -71,6 +74,9 @@ var supportedResourceTypes = []struct {
 			{"spec", "source", "git", "url"},
 			{"metadata", "annotations", "git-provider"},
 			{"metadata", "annotations", "git-provider-url"},
+		},
+		untouchableFields: [][]string{
+			{"metadata", "annotations", "appstudio.openshift.io/request"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
@@ -164,6 +170,10 @@ func MkResources(
 			unhandledTemplates[i] = false
 			resource := unstructuredObj.Unstructured.DeepCopy()
 			resource.SetNamespace(pds.GetNamespace())
+
+			// Remove untouchable fields from the template before processing
+			removeUntouchableFields(resource, srt.untouchableFields)
+
 			if err := applyResourceTemplate(resource, srt.templateAbleNameFields, templateVarValues); err != nil {
 				return nil, err
 			}
@@ -284,4 +294,13 @@ func getVarValues(
 		}
 	}
 	return
+}
+
+// removeUntouchableFields removes the specified fields from the resource object.
+// This is used to ensure that untouchable fields from templates are not included
+// in generated resources.
+func removeUntouchableFields(resource *unstructured.Unstructured, untouchableFields [][]string) {
+	for _, fieldPath := range untouchableFields {
+		unstructured.RemoveNestedField(resource.Object, fieldPath...)
+	}
 }

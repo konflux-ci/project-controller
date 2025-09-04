@@ -66,6 +66,7 @@ spec:
         git-provider: "{{.cool_git_provider}}"
         git-provider-url: "{{.cool_git_provider_url}}"
         mintmaker.appstudio.redhat.com/disabled: "{{.mintmaker_disable}}"
+        appstudio.openshift.io/request: "configure-pac"
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"
@@ -85,6 +86,7 @@ spec:
       name: "cool-comp2-{{.versionName}}"
       annotations:
         pvc.konflux.dev/cloned-from: cool_comp2_main
+        appstudio.openshift.io/request: "configure-pac"
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp2-{{.versionName}}"
