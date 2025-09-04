@@ -3,7 +3,8 @@ kind: Component
 metadata:
   name: "cool-comp1-5-5-0"
   annotations:
-    applicationFailCounter: "5"  
+    applicationFailCounter: "5"
+    appstudio.openshift.io/request: "deploy"
   finalizers:
     - test.appstudio.openshift.io/component
     - image-controller.appstudio.openshift.io/image-repository
