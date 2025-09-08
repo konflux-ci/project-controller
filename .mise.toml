@@ -5,6 +5,6 @@ kubectl = "1.30.2"
 kind = "0.22.0"
 crc = "2.39.0"
 
-[plugins]
+[alias]
 # Need to use Barak's fork until PR#8 is merged upstream
 crc = 'https://github.com/ifireball/asdf-crc#revert-bkorren-fix'
