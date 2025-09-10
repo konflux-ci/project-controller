@@ -1,0 +1,11 @@
+# CODEOWNERS
+# This file defines the default reviewers for pull requests in this repository.
+# Members of the Vanguard team will be automatically requested as reviewers.
+
+# Global rule: All files require review from the Vanguard team
+* @konflux-ci/Vanguard
+
+# Specific patterns can be added below if needed
+# For example, if you want specific teams for specific directories:
+# /squid/ @konflux-ci/Vanguard @konflux-ci/another-team
+# *.md @konflux-ci/docs-team 
