@@ -15,7 +15,7 @@ func ApplyFile(ctx context.Context, k8sClient client.Client, path string, ns str
 	res.SetNamespace(ns)
 	g.Expect(k8sClient.Patch(
 		ctx, res,
-		client.Apply,
+		client.Apply, //nolint:staticcheck // deprecated: will be migrated to new Apply API in future
 		client.FieldOwner("test-suite"), client.ForceOwnership,
 	)).To(g.Succeed())
 }
