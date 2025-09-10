@@ -144,7 +144,13 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
-	err := r.Client.Patch(ctx, resource, client.Apply, client.FieldOwner("projctl.konflux.dev"), client.ForceOwnership)
+	err := r.Client.Patch(
+		ctx,
+		resource,
+		client.Apply, //nolint:staticcheck // deprecated: will be migrated to new Apply API in future
+		client.FieldOwner("projctl.konflux.dev"),
+		client.ForceOwnership,
+	)
 	if err != nil {
 		log.Error(err, fmt.Sprintf("Failed to create or update resource: %s [%s]", resource.GetName(), resource.GetKind()))
 		return apierrors.IsConflict(err)
