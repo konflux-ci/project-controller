@@ -37,6 +37,12 @@
       "autoApprove": true
     },
     {
+      "description": "Auto-merge all Go dependencies (ungrouped)",
+      "matchDatasources": ["go"],
+      "automerge": true,
+      "autoApprove": true
+    },
+    {
       "matchPackageNames": [
         "quay.io/konflux-ci/*",
         "quay.io/redhat-appstudio/*"
