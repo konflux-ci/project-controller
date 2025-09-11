@@ -37,32 +37,6 @@
       "autoApprove": true
     },
     {
-      "description": "Group Kubernetes ecosystem dependencies to prevent version conflicts",
-      "groupName": "kubernetes-ecosystem",
-      "matchPackagePatterns": [
-        "^k8s.io/",
-        "^sigs.k8s.io/"
-      ],
-      "matchDatasources": ["go"],
-      "automerge": false,
-      "autoApprove": false
-    },
-    {
-      "description": "Group Go dependencies",
-      "groupName": "go-dependencies",
-      "matchDatasources": ["go"],
-      "excludePackageNames": [
-        "github.com/konflux-ci/release-service",
-        "knative.dev/pkg"
-      ],
-      "excludePackagePatterns": [
-        "^k8s.io/",
-        "^sigs.k8s.io/"
-      ],
-      "automerge": false,
-      "autoApprove": false
-    },
-    {
       "matchPackageNames": [
         "quay.io/konflux-ci/*",
         "quay.io/redhat-appstudio/*"
