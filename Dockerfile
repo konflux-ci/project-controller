@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM registry.access.redhat.com/ubi9/go-toolset:9.6-1756993846 AS builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.6-1758501173 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o /o
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://catalog.redhat.com/software/containers/ubi9-micro/61832b36dd607bfc82e66399 for more details
-FROM registry.access.redhat.com/ubi9-micro@sha256:f5c5213d2969b7b11a6666fc4b849d56b48d9d7979b60a37bb853dff0255c14b
+FROM registry.access.redhat.com/ubi9-micro@sha256:f45ee3d1f8ea8cd490298769daac2ac61da902e83715186145ac2e65322ddfc8
 WORKDIR /
 COPY --from=builder /opt/app-root/manager .
 COPY LICENSE /licenses/
