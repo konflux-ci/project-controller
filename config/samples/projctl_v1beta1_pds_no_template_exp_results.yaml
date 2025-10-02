@@ -1,0 +1,19 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-no-template
+  ownerReferences:
+  - apiVersion: projctl.konflux.dev/v1beta1
+    kind: Project
+    name: project-sample
+spec:
+  project: project-sample
+status:
+  conditions:
+  - type: Ready
+    status: "True"
+    reason: NoTemplate
+    message: "ProjectDevelopmentStream ready (no template specified)"
+    observedGeneration: 1
+    lastTransitionTime: "1970-01-01T00:00:00Z"
+

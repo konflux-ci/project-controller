@@ -1,0 +1,24 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-invalid-template
+  ownerReferences:
+  - apiVersion: projctl.konflux.dev/v1beta1
+    kind: Project
+    name: project-sample
+spec:
+  project: project-sample
+  template:
+    name: pdst-invalid-template
+    values:
+    - name: version
+      value: "1.0.0"
+status:
+  conditions:
+  - type: Ready
+    status: "False"
+    reason: TemplateGenerationFailed
+    message: "Failed to generate resources from template: invalid resource name value 'app-<no value>' for resource field 'metadata.name'. Consider using the 'hyphenize' template function"
+    observedGeneration: 1
+    lastTransitionTime: "1970-01-01T00:00:00Z"
+

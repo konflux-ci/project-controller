@@ -1,0 +1,12 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-invalid-template
+spec:
+  project: project-sample
+  template:
+    name: pdst-invalid-template
+    values:
+    - name: version
+      value: "1.0.0"
+

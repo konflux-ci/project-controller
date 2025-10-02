@@ -55,11 +55,10 @@ type ProjectDevelopmentStreamSpec struct {
 
 // ProjectDevelopmentStreamStatus defines the observed state of ProjectDevelopmentStream
 // Conditions include:
-// - TemplateApplied (reasons: Success, TemplateNotFound, VariableError, ResourceError, ProcessingError)
-// - TemplateGenerated (reasons: Success, TemplateError, VariableValidationFailed, ResourceValidationFailed)
+// - Ready (reasons: Reconciling, UpdatingOwnerRef, NoTemplate, TemplateFetchFailed, TemplateGenerationFailed, ResourcesApplied, ApplyingResources)
 type ProjectDevelopmentStreamStatus struct {
 	// Represents the observations of a ProjectDevelopmentStream's current state.
-	// Known .status.conditions.type are: "TemplateApplied", and "TemplateGenerated"
+	// Known .status.conditions.type are: "Ready"
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	// +listType=map

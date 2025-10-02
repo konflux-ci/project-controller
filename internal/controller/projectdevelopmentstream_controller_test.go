@@ -74,12 +74,21 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(ownership.HasProductRef(k8sClient, getPDS(ctx, k8sClient, testNsN))).To(BeTrue())
 
+				By("Verifying UpdatingOwnerRef status after first reconcile")
+				updatedPds := getPDS(ctx, k8sClient, testNsN)
+				Expect(updatedPds.Status.Conditions).To(HaveLen(1))
+				Expect(updatedPds.Status.Conditions[0].Type).To(Equal(ConditionTypeReady))
+				Expect(updatedPds.Status.Conditions[0].Status).To(Equal(metav1.ConditionUnknown))
+				Expect(updatedPds.Status.Conditions[0].Reason).To(Equal("UpdatingOwnerRef"))
+
 				By("Creating the templates objects")
 				_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
 				Expect(err).NotTo(HaveOccurred())
 				checkExpectedFile(ctx, k8sClient, expFile, testNs)
 			})
 		},
+		// The following 5 tests primarily verify template resource generation.
+		// They also verify status condition: Ready=True, UpdatingOwnerRef (after 1st reconcile) and ResourcesApplied (final)
 		Entry(
 			"Application and Component resources",
 			"projectdevelopmentstream-sample-w-template-vars",
@@ -121,6 +130,34 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			"projctl_v1beta1_pdst_w_existing_comp.yaml",
 			"projctl_v1beta1_pds_w_existing_comp.yaml",
 		),
+		// Status: Ready=True, Reason: NoTemplate
+		Entry(
+			"No template specified",
+			"pds-no-template",
+			"projctl_v1beta1_pds_no_template_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pds_no_template.yaml",
+		),
+		// Status: Ready=False, Reason: TemplateFetchFailed
+		Entry(
+			"Template not found",
+			"pds-template-not-found",
+			"projctl_v1beta1_pds_template_not_found_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pds_template_not_found.yaml",
+		),
+		// Status: Ready=False, Reason: TemplateGenerationFailed
+		Entry(
+			"Invalid template syntax",
+			"pds-invalid-template",
+			"projctl_v1beta1_pds_invalid_template_exp_results.yaml",
+			"projctl_v1beta1_project.yaml",
+			"projctl_v1beta1_pdst_invalid_template.yaml",
+			"projctl_v1beta1_pds_invalid_template.yaml",
+		),
+		// Note: The following status reasons are NOT tested:
+		// - "Reconciling": Too transient, immediately overwritten by subsequent conditions
+		// - "ApplyingResources": Requires reliable resource conflict simulation, difficult to test without flakiness
 	)
 })
 
@@ -183,6 +220,8 @@ func checkExpectedFile(ctx context.Context, k8sClient client.Client, fname strin
 		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(&resource), &existing)).To(Succeed())
 
 		dropUncomparableMetadata(&existing)
+		dropTimestamps(&existing)
+		dropTimestamps(&resource)
 
 		Expect(existing.Object).To(Equal(resource.Object))
 	}
@@ -208,6 +247,24 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 		}
 	}
 	Expect(unstructured.SetNestedField(obj.Object, nmd, "metadata")).To(Succeed())
+}
+
+func dropTimestamps(obj *unstructured.Unstructured) {
+	// Normalize lastTransitionTime to a fixed value for comparison
+	conditions, found, err := unstructured.NestedSlice(obj.Object, "status", "conditions")
+	if err != nil || !found {
+		return
+	}
+
+	for i := range conditions {
+		if condition, ok := conditions[i].(map[string]interface{}); ok {
+			if _, hasTimestamp := condition["lastTransitionTime"]; hasTimestamp {
+				condition["lastTransitionTime"] = "1970-01-01T00:00:00Z"
+			}
+		}
+	}
+
+	Expect(unstructured.SetNestedSlice(obj.Object, conditions, "status", "conditions")).To(Succeed())
 }
 
 func keepNamespaces() bool {
