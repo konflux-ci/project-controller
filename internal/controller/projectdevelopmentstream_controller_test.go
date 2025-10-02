@@ -183,6 +183,7 @@ func checkExpectedFile(ctx context.Context, k8sClient client.Client, fname strin
 		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(&resource), &existing)).To(Succeed())
 
 		dropUncomparableMetadata(&existing)
+		dropStatus(&existing)
 
 		Expect(existing.Object).To(Equal(resource.Object))
 	}
@@ -208,6 +209,12 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 		}
 	}
 	Expect(unstructured.SetNestedField(obj.Object, nmd, "metadata")).To(Succeed())
+}
+
+func dropStatus(obj *unstructured.Unstructured) {
+	// Remove status field from comparison since it's set by the controller
+	// but not present in expected resource files
+	delete(obj.Object, "status")
 }
 
 func keepNamespaces() bool {
