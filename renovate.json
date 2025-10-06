@@ -5,34 +5,50 @@
   "packageRules": [
     {
       "description": "Auto-merge patch updates for Konflux components",
-      "matchUpdateTypes": ["patch", "digest"],
-      "matchPackagePatterns": ["^quay.io/konflux-ci/"],
+      "matchUpdateTypes": [
+        "patch",
+        "digest"
+      ],
       "automerge": true,
-      "autoApprove": true
+      "autoApprove": true,
+      "matchPackageNames": [
+        "/^quay.io/konflux-ci//"
+      ]
     },
     {
       "description": "Group Tekton bundle updates together",
       "groupName": "tekton-bundles",
-      "matchPackagePatterns": ["quay.io/konflux-ci/tekton-catalog/"],
       "automerge": true,
-      "autoApprove": true
+      "autoApprove": true,
+      "matchPackageNames": [
+        "/quay.io/konflux-ci/tekton-catalog//"
+      ]
     },
     {
       "description": "Group container base image updates",
       "groupName": "container-images",
-      "matchPackagePatterns": [
-        "registry.access.redhat.com/",
-        "registry.fedoraproject.org/"
+      "matchUpdateTypes": [
+        "patch",
+        "digest"
       ],
-      "matchUpdateTypes": ["patch", "digest"],
       "automerge": true,
-      "autoApprove": true
+      "autoApprove": true,
+      "matchPackageNames": [
+        "/registry.access.redhat.com//",
+        "/registry.fedoraproject.org//"
+      ]
     },
     {
       "description": "Auto-merge Go toolchain patch updates only",
-      "matchPackageNames": ["go"],
-      "matchDatasources": ["golang-version"],
-      "matchUpdateTypes": ["patch"],
+      "matchPackageNames": [
+        "go"
+      ],
+      "matchDatasources": [
+        "golang-version"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "autoApprove": true
     },
