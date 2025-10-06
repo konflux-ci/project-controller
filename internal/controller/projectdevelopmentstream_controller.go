@@ -40,6 +40,11 @@ import (
 	"github.com/konflux-ci/project-controller/pkg/logr/muxr"
 )
 
+const (
+	// ConditionTypeReady represents the Ready condition type
+	ConditionTypeReady = "Ready"
+)
+
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
 type ProjectDevelopmentStreamReconciler struct {
 	client.Client
@@ -243,7 +248,7 @@ func getSameNSEventHandler(r *ProjectDevelopmentStreamReconciler) handler.EventH
 // setReadyCondition sets the Ready condition and updates the status
 func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Context, pds *projctlv1beta1.ProjectDevelopmentStream, status metav1.ConditionStatus, reason, message string) error {
 	condition := metav1.Condition{
-		Type:               "Ready",
+		Type:               ConditionTypeReady,
 		Status:             status,
 		ObservedGeneration: pds.Generation,
 		LastTransitionTime: metav1.Now(),
@@ -253,7 +258,7 @@ func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Conte
 
 	// Find and update existing Ready condition
 	for i, existing := range pds.Status.Conditions {
-		if existing.Type == "Ready" {
+		if existing.Type == ConditionTypeReady {
 			// Only update LastTransitionTime if status changed
 			if existing.Status == status {
 				condition.LastTransitionTime = existing.LastTransitionTime
