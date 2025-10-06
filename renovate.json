@@ -16,8 +16,7 @@
       ]
     },
     {
-      "description": "Group Tekton bundle updates together",
-      "groupName": "tekton-bundles",
+      "description": "Auto-merge Tekton bundle updates",
       "automerge": true,
       "autoApprove": true,
       "matchPackageNames": [
