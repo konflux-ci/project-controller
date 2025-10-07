@@ -140,11 +140,23 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 		It("should set Ready=True with NoTemplate reason when no template is specified", func() {
 			ctx := context.Background()
 			testNs := setupTestNamespace(ctx, k8sClient)
-			pdsName := "projectdevelopmentstream-sample-plain"
+			pdsName := "pds-no-template"
 			testNsN := types.NamespacedName{Namespace: testNs, Name: pdsName}
 
 			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
-			applySampleFile(ctx, k8sClient, "projctl_v1beta1_projectdevelopmentstream.yaml", testNs)
+
+			// Create a PDS with no template specified
+			pds := &projctlv1beta1.ProjectDevelopmentStream{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pdsName,
+					Namespace: testNs,
+				},
+				Spec: projctlv1beta1.ProjectDevelopmentStreamSpec{
+					Project: "project-sample",
+					// Template is intentionally nil
+				},
+			}
+			Expect(k8sClient.Create(ctx, pds)).To(Succeed())
 
 			controllerReconciler := &ProjectDevelopmentStreamReconciler{
 				Client:   saClient,
@@ -161,16 +173,16 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			By("Verifying Ready=True with NoTemplate reason")
-			pds := getPDS(ctx, k8sClient, testNsN)
+			updatedPds := getPDS(ctx, k8sClient, testNsN)
 			var readyCondition *metav1.Condition
-			for i := range pds.Status.Conditions {
-				if pds.Status.Conditions[i].Type == ConditionTypeReady {
-					readyCondition = &pds.Status.Conditions[i]
+			for i := range updatedPds.Status.Conditions {
+				if updatedPds.Status.Conditions[i].Type == ConditionTypeReady {
+					readyCondition = &updatedPds.Status.Conditions[i]
 					break
 				}
 			}
 			Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
-			Expect(readyCondition.Status).To(Equal(metav1.ConditionTrue), "Ready should be True when no template")
+			Expect(readyCondition.Status).To(Equal(metav1.ConditionTrue), "Ready should be True when no template specified")
 			Expect(readyCondition.Reason).To(Equal("NoTemplate"))
 			Expect(readyCondition.Message).To(ContainSubstring("no template specified"))
 		})
@@ -178,7 +190,7 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 		It("should set Ready=False when template does not exist", func() {
 			ctx := context.Background()
 			testNs := setupTestNamespace(ctx, k8sClient)
-			pdsName := "pds-with-missing-template"
+			pdsName := "pds-missing-template"
 			testNsN := types.NamespacedName{Namespace: testNs, Name: pdsName}
 
 			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
