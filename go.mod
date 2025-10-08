@@ -20,7 +20,7 @@ require (
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
-replace k8s.io/client-go => k8s.io/client-go v0.34.0
+replace k8s.io/client-go => k8s.io/client-go v0.34.1
 
 replace github.com/google/cel-go => github.com/google/cel-go v0.26.1
 
