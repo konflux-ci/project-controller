@@ -24,6 +24,11 @@ replace k8s.io/client-go => k8s.io/client-go v0.34.0
 
 replace github.com/google/cel-go => github.com/google/cel-go v0.26.1
 
+// Pin knative.dev/pkg to avoid breaking changes with newer versions.
+// Knative migrated to OpenTelemetry.
+// knative.dev/pkg/metrics is required by Tekton but not available anymore.
+replace knative.dev/pkg => knative.dev/pkg v0.0.0-20250415155312-ed3e2158b883
+
 require (
 	cel.dev/expr v0.24.0 // indirect
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20230502190836-7399e0f8ee5e // indirect
