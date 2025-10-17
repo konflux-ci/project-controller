@@ -78,6 +78,19 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
 				Expect(err).NotTo(HaveOccurred())
 				checkExpectedFile(ctx, k8sClient, expFile, testNs)
+
+				By("Verifying Ready status condition is set")
+				pds := getPDS(ctx, k8sClient, testNsN)
+				var readyCondition *metav1.Condition
+				for i := range pds.Status.Conditions {
+					if pds.Status.Conditions[i].Type == ConditionTypeReady {
+						readyCondition = &pds.Status.Conditions[i]
+						break
+					}
+				}
+				Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
+				Expect(readyCondition.Status).To(Equal(metav1.ConditionTrue), "Ready should be True")
+				Expect(readyCondition.Reason).To(Equal("ResourcesApplied"))
 			})
 		},
 		Entry(
@@ -122,6 +135,154 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 			"projctl_v1beta1_pds_w_existing_comp.yaml",
 		),
 	)
+
+	Context("Status Conditions for edge cases", func() {
+		It("should set Ready=True with NoTemplate reason when no template is specified", func() {
+			ctx := context.Background()
+			testNs := setupTestNamespace(ctx, k8sClient)
+			pdsName := "pds-no-template"
+			testNsN := types.NamespacedName{Namespace: testNs, Name: pdsName}
+
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
+
+			// Create a PDS with no template specified
+			pds := &projctlv1beta1.ProjectDevelopmentStream{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pdsName,
+					Namespace: testNs,
+				},
+				Spec: projctlv1beta1.ProjectDevelopmentStreamSpec{
+					Project: "project-sample",
+					// Template is intentionally nil
+				},
+			}
+			Expect(k8sClient.Create(ctx, pds)).To(Succeed())
+
+			controllerReconciler := &ProjectDevelopmentStreamReconciler{
+				Client:   saClient,
+				Scheme:   saClient.Scheme(),
+				Recorder: saCluster.GetEventRecorderFor("ProjectDevelopmentStream-controller-tests"),
+			}
+
+			By("Setting the owner reference")
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Handling PDS with no template")
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Verifying Ready=True with NoTemplate reason")
+			updatedPds := getPDS(ctx, k8sClient, testNsN)
+			var readyCondition *metav1.Condition
+			for i := range updatedPds.Status.Conditions {
+				if updatedPds.Status.Conditions[i].Type == ConditionTypeReady {
+					readyCondition = &updatedPds.Status.Conditions[i]
+					break
+				}
+			}
+			Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
+			Expect(readyCondition.Status).To(Equal(metav1.ConditionTrue), "Ready should be True when no template specified")
+			Expect(readyCondition.Reason).To(Equal("NoTemplate"))
+			Expect(readyCondition.Message).To(ContainSubstring("no template specified"))
+		})
+
+		It("should set Ready=False when template does not exist", func() {
+			ctx := context.Background()
+			testNs := setupTestNamespace(ctx, k8sClient)
+			pdsName := "pds-missing-template"
+			testNsN := types.NamespacedName{Namespace: testNs, Name: pdsName}
+
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
+
+			// Create a PDS that references a non-existent template
+			pds := &projctlv1beta1.ProjectDevelopmentStream{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pdsName,
+					Namespace: testNs,
+				},
+				Spec: projctlv1beta1.ProjectDevelopmentStreamSpec{
+					Project: "project-sample",
+					Template: &projctlv1beta1.ProjectDevelopmentStreamSpecTemplateRef{
+						Name: "nonexistent-template",
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, pds)).To(Succeed())
+
+			controllerReconciler := &ProjectDevelopmentStreamReconciler{
+				Client:   saClient,
+				Scheme:   saClient.Scheme(),
+				Recorder: saCluster.GetEventRecorderFor("ProjectDevelopmentStream-controller-tests"),
+			}
+
+			By("Setting the owner reference")
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Attempting to fetch non-existent template")
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Verifying Ready=False with TemplateFetchFailed reason")
+			updatedPds := getPDS(ctx, k8sClient, testNsN)
+			var readyCondition *metav1.Condition
+			for i := range updatedPds.Status.Conditions {
+				if updatedPds.Status.Conditions[i].Type == ConditionTypeReady {
+					readyCondition = &updatedPds.Status.Conditions[i]
+					break
+				}
+			}
+			Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
+			Expect(readyCondition.Status).To(Equal(metav1.ConditionFalse), "Ready should be False when template not found")
+			Expect(readyCondition.Reason).To(Equal("TemplateFetchFailed"))
+			Expect(readyCondition.Message).To(ContainSubstring("Failed to fetch template"))
+		})
+
+		It("should set Ready=Unknown with UpdatingOwnerRef reason when owner ref is set", func() {
+			ctx := context.Background()
+			testNs := setupTestNamespace(ctx, k8sClient)
+
+			// Create PDS without owner reference by creating it directly
+			pdsName := "pds-no-owner-ref"
+			pds := &projctlv1beta1.ProjectDevelopmentStream{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pdsName,
+					Namespace: testNs,
+				},
+				Spec: projctlv1beta1.ProjectDevelopmentStreamSpec{
+					Project: "project-sample",
+				},
+			}
+			Expect(k8sClient.Create(ctx, pds)).To(Succeed())
+
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
+			testNsN := types.NamespacedName{Namespace: testNs, Name: pdsName}
+
+			controllerReconciler := &ProjectDevelopmentStreamReconciler{
+				Client:   saClient,
+				Scheme:   saClient.Scheme(),
+				Recorder: saCluster.GetEventRecorderFor("ProjectDevelopmentStream-controller-tests"),
+			}
+
+			By("Setting owner reference")
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Verifying Ready=Unknown with UpdatingOwnerRef reason")
+			updatedPds := getPDS(ctx, k8sClient, testNsN)
+			var readyCondition *metav1.Condition
+			for i := range updatedPds.Status.Conditions {
+				if updatedPds.Status.Conditions[i].Type == ConditionTypeReady {
+					readyCondition = &updatedPds.Status.Conditions[i]
+					break
+				}
+			}
+			Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
+			Expect(readyCondition.Status).To(Equal(metav1.ConditionUnknown), "Ready should be Unknown when updating owner ref")
+			Expect(readyCondition.Reason).To(Equal("UpdatingOwnerRef"))
+		})
+	})
 })
 
 func applySampleFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
@@ -183,6 +344,7 @@ func checkExpectedFile(ctx context.Context, k8sClient client.Client, fname strin
 		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(&resource), &existing)).To(Succeed())
 
 		dropUncomparableMetadata(&existing)
+		dropStatus(&existing)
 
 		Expect(existing.Object).To(Equal(resource.Object))
 	}
@@ -208,6 +370,12 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 		}
 	}
 	Expect(unstructured.SetNestedField(obj.Object, nmd, "metadata")).To(Succeed())
+}
+
+func dropStatus(obj *unstructured.Unstructured) {
+	// Remove status field from comparison since it's set by the controller
+	// but not present in expected resource files
+	delete(obj.Object, "status")
 }
 
 func keepNamespaces() bool {
