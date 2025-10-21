@@ -377,7 +377,7 @@ func dropTimestamps(obj *unstructured.Unstructured) {
 		}
 	}
 
-	_ = unstructured.SetNestedSlice(obj.Object, conditions, "status", "conditions")
+	Expect(unstructured.SetNestedSlice(obj.Object, conditions, "status", "conditions")).To(Succeed())
 }
 
 func keepNamespaces() bool {
