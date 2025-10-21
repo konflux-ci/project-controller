@@ -78,19 +78,6 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 				_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
 				Expect(err).NotTo(HaveOccurred())
 				checkExpectedFile(ctx, k8sClient, expFile, testNs)
-
-				By("Verifying Ready status condition is set")
-				pds := getPDS(ctx, k8sClient, testNsN)
-				var readyCondition *metav1.Condition
-				for i := range pds.Status.Conditions {
-					if pds.Status.Conditions[i].Type == ConditionTypeReady {
-						readyCondition = &pds.Status.Conditions[i]
-						break
-					}
-				}
-				Expect(readyCondition).NotTo(BeNil(), "Ready condition should exist")
-				Expect(readyCondition.Status).To(Equal(metav1.ConditionTrue), "Ready should be True")
-				Expect(readyCondition.Reason).To(Equal("ResourcesApplied"))
 			})
 		},
 		Entry(
@@ -136,6 +123,9 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 		),
 	)
 
+	// Status Conditions for edge cases that require different test setup than the table-driven tests above.
+	// These tests don't fit the Entry pattern because they have different resource creation needs,
+	// require specific ordering, or test early-return scenarios that don't apply resources
 	Context("Status Conditions for edge cases", func() {
 		It("should set Ready=True with NoTemplate reason when no template is specified", func() {
 			ctx := context.Background()
@@ -344,7 +334,8 @@ func checkExpectedFile(ctx context.Context, k8sClient client.Client, fname strin
 		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(&resource), &existing)).To(Succeed())
 
 		dropUncomparableMetadata(&existing)
-		dropStatus(&existing)
+		dropTimestamps(&existing)
+		dropTimestamps(&resource)
 
 		Expect(existing.Object).To(Equal(resource.Object))
 	}
@@ -372,10 +363,21 @@ func dropUncomparableMetadata(obj *unstructured.Unstructured) {
 	Expect(unstructured.SetNestedField(obj.Object, nmd, "metadata")).To(Succeed())
 }
 
-func dropStatus(obj *unstructured.Unstructured) {
-	// Remove status field from comparison since it's set by the controller
-	// but not present in expected resource files
-	delete(obj.Object, "status")
+func dropTimestamps(obj *unstructured.Unstructured) {
+	// Remove lastTransitionTime from status conditions for comparison
+	// since timestamps change on every reconciliation
+	conditions, found, err := unstructured.NestedSlice(obj.Object, "status", "conditions")
+	if err != nil || !found {
+		return
+	}
+
+	for i := range conditions {
+		if condition, ok := conditions[i].(map[string]interface{}); ok {
+			delete(condition, "lastTransitionTime")
+		}
+	}
+
+	_ = unstructured.SetNestedSlice(obj.Object, conditions, "status", "conditions")
 }
 
 func keepNamespaces() bool {

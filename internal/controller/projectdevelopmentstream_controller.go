@@ -89,9 +89,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	log = muxr.NewMuxLogger(log, eventr.NewEventr(r.Recorder, &pds))
 
 	// Set initial condition
-	if err := r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "Reconciling", "Reconciling ProjectDevelopmentStream"); err != nil {
-		log.Error(err, "Failed to update status")
-	}
+	_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "Reconciling", "Reconciling ProjectDevelopmentStream")
 
 	// This is arguably better done in an admission hook, but its easier to test
 	// when doing this from the controller
@@ -104,9 +102,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		} else {
 			// Since we modified the PDS object exit so another reconciliation
 			// run can start with updated owner ref
-			if err := r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "UpdatingOwnerRef", "Owner reference updated, re-reconciling"); err != nil {
-				log.Error(err, "Failed to update status")
-			}
+			_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "UpdatingOwnerRef", "Owner reference updated, re-reconciling")
 			return ctrl.Result{}, nil
 		}
 	}
@@ -114,9 +110,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	var templateName string
 	if pds.Spec.Template == nil {
 		log.Info("No template is associated with this ProjectDevelopmentStream")
-		if err := r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "NoTemplate", "ProjectDevelopmentStream ready (no template specified)"); err != nil {
-			log.Error(err, "Failed to update status")
-		}
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "NoTemplate", "ProjectDevelopmentStream ready (no template specified)")
 		return ctrl.Result{}, nil
 	}
 	templateName = pds.Spec.Template.Name
@@ -126,9 +120,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	templateKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: templateName}
 	if err := r.Get(ctx, templateKey, &pdst); err != nil {
 		log.Error(err, "Failed to fetch template")
-		if statusErr := r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateFetchFailed", fmt.Sprintf("Failed to fetch template: %v", err)); statusErr != nil {
-			log.Error(statusErr, "Failed to update status")
-		}
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateFetchFailed", fmt.Sprintf("Failed to fetch template: %v", err))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -136,9 +128,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	resources, err := template.MkResources(pds, pdst)
 	if err != nil {
 		log.Error(err, "Failed to generate resources from template")
-		if statusErr := r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateGenerationFailed", fmt.Sprintf("Failed to generate resources from template: %v", err)); statusErr != nil {
-			log.Error(statusErr, "Failed to update status")
-		}
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateGenerationFailed", fmt.Sprintf("Failed to generate resources from template: %v", err))
 		// We return 'nil' error because there is not point retrying the
 		// reconcile loop
 		return ctrl.Result{}, nil
@@ -162,13 +152,9 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 
 	// Set final condition based on whether we need to requeue
 	if requeue {
-		if err := r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "ApplyingResources", "Resource conflicts detected, retrying"); err != nil {
-			log.Error(err, "Failed to update status")
-		}
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "ApplyingResources", "Resource conflicts detected, retrying")
 	} else {
-		if err := r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "ResourcesApplied", "All resources applied successfully"); err != nil {
-			log.Error(err, "Failed to update status")
-		}
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "ResourcesApplied", "All resources applied successfully")
 	}
 
 	return ctrl.Result{Requeue: requeue}, nil
@@ -247,6 +233,8 @@ func getSameNSEventHandler(r *ProjectDevelopmentStreamReconciler) handler.EventH
 
 // setReadyCondition sets the Ready condition and updates the status
 func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Context, pds *projctlv1beta1.ProjectDevelopmentStream, status metav1.ConditionStatus, reason, message string) error {
+	log := log.FromContext(ctx)
+
 	condition := metav1.Condition{
 		Type:               ConditionTypeReady,
 		Status:             status,
@@ -264,13 +252,21 @@ func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Conte
 				condition.LastTransitionTime = existing.LastTransitionTime
 			}
 			pds.Status.Conditions[i] = condition
-			return r.Status().Update(ctx, pds)
+			if err := r.Status().Update(ctx, pds); err != nil {
+				log.Error(err, "Failed to update Ready condition", "reason", reason)
+				return err
+			}
+			return nil
 		}
 	}
 
 	// Condition not found, append new one
 	pds.Status.Conditions = append(pds.Status.Conditions, condition)
-	return r.Status().Update(ctx, pds)
+	if err := r.Status().Update(ctx, pds); err != nil {
+		log.Error(err, "Failed to update Ready condition", "reason", reason)
+		return err
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
