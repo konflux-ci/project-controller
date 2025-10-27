@@ -10,7 +10,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679
 	github.com/konflux-ci/image-controller v0.0.0-20251024113110-f07d01fc76a6
 	github.com/konflux-ci/integration-service v0.0.0-20251024160834-5c1f34b47cc1
-	github.com/konflux-ci/release-service v0.0.0-20251024164555-f1ad228dce98
+	github.com/konflux-ci/release-service v0.0.0-20251026180058-8ef13e5a84aa
 	github.com/onsi/ginkgo/v2 v2.27.1
 	github.com/onsi/gomega v1.38.2
 	k8s.io/api v0.34.1
@@ -100,7 +100,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.1 // indirect
-	github.com/prometheus/procfs v0.19.0 // indirect
+	github.com/prometheus/procfs v0.19.1 // indirect
 	github.com/prometheus/statsd_exporter v0.28.0 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.2 // indirect
