@@ -11,7 +11,7 @@ require (
 	github.com/konflux-ci/image-controller v0.0.0-20251024113110-f07d01fc76a6
 	github.com/konflux-ci/integration-service v0.0.0-20251027100948-9a643a93a4fc
 	github.com/konflux-ci/release-service v0.0.0-20251028041125-441e6d2a5ca0
-	github.com/onsi/ginkgo/v2 v2.27.1
+	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
@@ -120,7 +120,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
-	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
