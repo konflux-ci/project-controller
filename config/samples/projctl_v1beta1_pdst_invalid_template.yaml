@@ -1,0 +1,18 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStreamTemplate
+metadata:
+  name: pdst-invalid-template
+spec:
+  project: project-sample
+  variables:
+  - name: version
+    description: A version number
+
+  resources:
+  - apiVersion: appstudio.redhat.com/v1alpha1
+    kind: Application
+    metadata:
+      name: "app-{{.undefinedVariable}}"
+    spec:
+      displayName: "App {{.version}}"
+

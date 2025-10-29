@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -37,6 +38,11 @@ import (
 	"github.com/konflux-ci/project-controller/internal/template"
 	"github.com/konflux-ci/project-controller/pkg/logr/eventr"
 	"github.com/konflux-ci/project-controller/pkg/logr/muxr"
+)
+
+const (
+	// ConditionTypeReady represents the Ready condition type
+	ConditionTypeReady = "Ready"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
@@ -81,6 +87,11 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 
 	log = log.WithValues("PDS name", pds.ObjectMeta.Name)
 	log = muxr.NewMuxLogger(log, eventr.NewEventr(r.Recorder, &pds))
+	// Update context with the enriched logger so that setReadyCondition can use it
+	ctx = ctrl.LoggerInto(ctx, log)
+
+	// Set initial condition
+	_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "Reconciling", "Reconciling ProjectDevelopmentStream")
 
 	// This is arguably better done in an admission hook, but its easier to test
 	// when doing this from the controller
@@ -92,7 +103,8 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			// continue to applying templates rather then quitting on error here
 		} else {
 			// Since we modified the PDS object exit so another reconciliation
-			// run can start
+			// run can start with updated owner ref
+			_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "UpdatingOwnerRef", "Owner reference updated, re-reconciling")
 			return ctrl.Result{}, nil
 		}
 	}
@@ -100,15 +112,18 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	var templateName string
 	if pds.Spec.Template == nil {
 		log.Info("No template is associated with this ProjectDevelopmentStream")
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "NoTemplate", "ProjectDevelopmentStream ready (no template specified)")
 		return ctrl.Result{}, nil
 	}
 	templateName = pds.Spec.Template.Name
 	log = log.WithValues("PDS Template", templateName)
+	ctx = ctrl.LoggerInto(ctx, log)
 
 	var pdst projctlv1beta1.ProjectDevelopmentStreamTemplate
 	templateKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: templateName}
 	if err := r.Get(ctx, templateKey, &pdst); err != nil {
 		log.Error(err, "Failed to fetch template")
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateFetchFailed", fmt.Sprintf("Failed to fetch template: %v", err))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -116,6 +131,7 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	resources, err := template.MkResources(pds, pdst)
 	if err != nil {
 		log.Error(err, "Failed to generate resources from template")
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionFalse, "TemplateGenerationFailed", fmt.Sprintf("Failed to generate resources from template: %v", err))
 		// We return 'nil' error because there is not point retrying the
 		// reconcile loop
 		return ctrl.Result{}, nil
@@ -135,6 +151,13 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			_ = controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
 		}
 		requeue = requeue || r.createOrUpdateResource(ctx, log, resource)
+	}
+
+	// Set final condition based on whether we need to requeue
+	if requeue {
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "ApplyingResources", "Resource conflicts detected, retrying")
+	} else {
+		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "ResourcesApplied", "All resources applied successfully")
 	}
 
 	return ctrl.Result{Requeue: requeue}, nil
@@ -209,6 +232,46 @@ func getSameNSEventHandler(r *ProjectDevelopmentStreamReconciler) handler.EventH
 			return ret
 		},
 	)
+}
+
+// setReadyCondition sets the Ready condition and updates the status
+func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Context, pds *projctlv1beta1.ProjectDevelopmentStream, status metav1.ConditionStatus, reason, message string) error {
+	log := log.FromContext(ctx)
+
+	condition := metav1.Condition{
+		Type:               ConditionTypeReady,
+		Status:             status,
+		ObservedGeneration: pds.Generation,
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Message:            message,
+	}
+
+	// Find and update existing Ready condition
+	for i, existing := range pds.Status.Conditions {
+		if existing.Type == ConditionTypeReady {
+			// Preserve LastTransitionTime when status hasn't changed per Kubernetes API conventions.
+			// LastTransitionTime should only update when the condition's status field transitions
+			// (True/False/Unknown), not when reason or message changes.
+			if existing.Status == status {
+				condition.LastTransitionTime = existing.LastTransitionTime
+			}
+			pds.Status.Conditions[i] = condition
+			if err := r.Status().Update(ctx, pds); err != nil {
+				log.Error(err, "Failed to update Ready condition", "reason", reason)
+				return err
+			}
+			return nil
+		}
+	}
+
+	// Condition not found, append new one
+	pds.Status.Conditions = append(pds.Status.Conditions, condition)
+	if err := r.Status().Update(ctx, pds); err != nil {
+		log.Error(err, "Failed to update Ready condition", "reason", reason)
+		return err
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

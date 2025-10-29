@@ -1,0 +1,7 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-no-template
+spec:
+  project: project-sample
+

@@ -1,0 +1,9 @@
+apiVersion: projctl.konflux.dev/v1beta1
+kind: ProjectDevelopmentStream
+metadata:
+  name: pds-template-not-found
+spec:
+  project: project-sample
+  template:
+    name: nonexistent-template
+

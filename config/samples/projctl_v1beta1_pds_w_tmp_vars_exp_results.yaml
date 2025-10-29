@@ -21,6 +21,14 @@ spec:
       value: "1.0.0"
     - name: mintmaker_disable
       value: "false"
+status:
+  conditions:
+  - type: Ready
+    status: "True"
+    reason: ResourcesApplied
+    message: "All resources applied successfully"
+    observedGeneration: 1
+    lastTransitionTime: "1970-01-01T00:00:00Z"
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Application
