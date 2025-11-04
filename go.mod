@@ -10,13 +10,13 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679
 	github.com/konflux-ci/image-controller v0.0.0-20251030134210-a7593ec0d7e9
 	github.com/konflux-ci/integration-service v0.0.0-20251030121518-f1d9b34aacb3
-	github.com/konflux-ci/release-service v0.0.0-20251102194255-7667228b1cfa
+	github.com/konflux-ci/release-service v0.0.0-20251104000847-37dae7743a89
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
 	k8s.io/client-go v1.5.2
-	sigs.k8s.io/controller-runtime v0.22.3
+	sigs.k8s.io/controller-runtime v0.22.4
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
