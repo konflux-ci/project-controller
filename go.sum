@@ -306,8 +306,8 @@ github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679 h1:mtLA
 github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679/go.mod h1:948Z+a1IbfRT0RtoHzWWSN9YEucSbMJTHaMhz7dVICc=
 github.com/konflux-ci/image-controller v0.0.0-20251103200336-52508499fe09 h1:Z9xUvNn112DDPqWfDNtejlSfRaoWrJzY6WyhM219wIE=
 github.com/konflux-ci/image-controller v0.0.0-20251103200336-52508499fe09/go.mod h1:Ent1Lre+1HTYC7MNHqnYDxuxxAN5Yp0zqVP0oq+fGn8=
-github.com/konflux-ci/integration-service v0.0.0-20251030121518-f1d9b34aacb3 h1:AKkKUaAQIXACuZvL0klP8YeeDAFxNCK0821QkiVsDTY=
-github.com/konflux-ci/integration-service v0.0.0-20251030121518-f1d9b34aacb3/go.mod h1:H6/3TyLvLbSno8p4ih5vYfB9DzWPFN0f+LXB0eo9YNU=
+github.com/konflux-ci/integration-service v0.0.0-20251103122011-2b719159f437 h1:4tduWYwiBGjU+/1MJshSdUWSL5U8vgeqnMi46P9jay8=
+github.com/konflux-ci/integration-service v0.0.0-20251103122011-2b719159f437/go.mod h1:H6/3TyLvLbSno8p4ih5vYfB9DzWPFN0f+LXB0eo9YNU=
 github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b h1:DR9ogk4RQvVDPOe1Y4zKDc0zRt6sLSqSLwLmGkoVr30=
 github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
 github.com/konflux-ci/release-service v0.0.0-20251104000847-37dae7743a89 h1:Aq1OByIjxdJY7wKxQVFUIXnqVwBD40kKqtLzbwr2o60=
