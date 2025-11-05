@@ -310,8 +310,8 @@ github.com/konflux-ci/integration-service v0.0.0-20251103122011-2b719159f437 h1:
 github.com/konflux-ci/integration-service v0.0.0-20251103122011-2b719159f437/go.mod h1:H6/3TyLvLbSno8p4ih5vYfB9DzWPFN0f+LXB0eo9YNU=
 github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b h1:DR9ogk4RQvVDPOe1Y4zKDc0zRt6sLSqSLwLmGkoVr30=
 github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
-github.com/konflux-ci/release-service v0.0.0-20251104025814-e3a6b0402667 h1:FnIvaagKuANGLaYf9o1UItiUOvTjjoe1Yz0cUE7r0v0=
-github.com/konflux-ci/release-service v0.0.0-20251104025814-e3a6b0402667/go.mod h1:1PQlcyKLcEAObiD3ycRJWZJnggxNH5uNcbG1s3eBiuE=
+github.com/konflux-ci/release-service v0.0.0-20251105013312-790da193d63a h1:fxF9JuhyYMIzkrzgZJM748OZ/FBNpo9Y8uuaNrN1VZk=
+github.com/konflux-ci/release-service v0.0.0-20251105013312-790da193d63a/go.mod h1:lFQjex8Wte/cNgHBLskf4H2yOrfb+ZpiU4zNwWcCV0Y=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
@@ -719,8 +719,8 @@ google.golang.org/api v0.25.0/go.mod h1:lIXQywCXRcnZPGlsd8NbLnOjtAoL6em04bJ9+z0M
 google.golang.org/api v0.28.0/go.mod h1:lIXQywCXRcnZPGlsd8NbLnOjtAoL6em04bJ9+z0MncE=
 google.golang.org/api v0.29.0/go.mod h1:Lcubydp8VUV7KeIHD9z2Bys/sm/vGKnG1UHuDBSrHWM=
 google.golang.org/api v0.30.0/go.mod h1:QGmEvQ87FHZNiUVJkT14jQNYJ4ZJjdRF23ZXz5138Fc=
-google.golang.org/api v0.254.0 h1:jl3XrGj7lRjnlUvZAbAdhINTLbsg5dbjmR90+pTQvt4=
-google.golang.org/api v0.254.0/go.mod h1:5BkSURm3D9kAqjGvBNgf0EcbX6Rnrf6UArKkwBzAyqQ=
+google.golang.org/api v0.255.0 h1:OaF+IbRwOottVCYV2wZan7KUq7UeNUQn1BcPc4K7lE4=
+google.golang.org/api v0.255.0/go.mod h1:d1/EtvCLdtiWEV4rAEHDHGh2bCnqsWhw+M8y2ECN4a8=
 google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.5.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
