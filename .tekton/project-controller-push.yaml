@@ -543,7 +543,8 @@ spec:
       optional: true
     - name: netrc
       optional: true
-  taskRunTemplate: {}
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-project-controller
   workspaces:
   - name: workspace
     volumeClaimTemplate:
