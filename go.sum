@@ -312,10 +312,10 @@ github.com/konflux-ci/image-controller v0.0.0-20251103200336-52508499fe09 h1:Z9x
 github.com/konflux-ci/image-controller v0.0.0-20251103200336-52508499fe09/go.mod h1:Ent1Lre+1HTYC7MNHqnYDxuxxAN5Yp0zqVP0oq+fGn8=
 github.com/konflux-ci/integration-service v0.0.0-20251116052503-a8a9bc0c63f2 h1:27bXM5zNLT/d3Cmi9KmhbQHp4vvQ/vTVmQ+8ujFJxZ4=
 github.com/konflux-ci/integration-service v0.0.0-20251116052503-a8a9bc0c63f2/go.mod h1:VYpBmGQxYvxJ1OMRuw6K7R0pNWhShJiZ4GTU3rxXPZ8=
-github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b h1:DR9ogk4RQvVDPOe1Y4zKDc0zRt6sLSqSLwLmGkoVr30=
-github.com/konflux-ci/operator-toolkit v0.0.0-20250903120054-1a071261f50b/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
-github.com/konflux-ci/release-service v0.0.0-20251118004940-1cae7aba89a6 h1:twFN/GYyc9juRM+XfiUx3KyIiGAO05a93HzygiIdRZ0=
-github.com/konflux-ci/release-service v0.0.0-20251118004940-1cae7aba89a6/go.mod h1:pN9r7a8MjSjoHquPn+xuyNTElxYGqVoBHU/iDaIZZtU=
+github.com/konflux-ci/operator-toolkit v0.0.0-20251118152634-b4f41f073069 h1:nT8V7Bva2LclJhWahIQYSNiYRHcmB22H6v4DD/FD7QU=
+github.com/konflux-ci/operator-toolkit v0.0.0-20251118152634-b4f41f073069/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
+github.com/konflux-ci/release-service v0.0.0-20251118184100-2284f1aae101 h1:Yy3SxxH1xDdy8gmrj4NMrPSxtjkE+m6gPxS/06VCKaY=
+github.com/konflux-ci/release-service v0.0.0-20251118184100-2284f1aae101/go.mod h1:szGbukJs8G4+lOQ16Klj8PxrgpvG30F/s7HQrWRcylE=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
