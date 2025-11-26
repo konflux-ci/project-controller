@@ -306,8 +306,8 @@ github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zt
 github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
 github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=
 github.com/klauspost/cpuid/v2 v2.3.0/go.mod h1:hqwkgyIinND0mEev00jJYCxPNVRVXFQeu1XKlok6oO0=
-github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679 h1:mtLA7dQ9iIncxYoOLgty2B1l1cucnp/tsbxQaKn9Myw=
-github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679/go.mod h1:948Z+a1IbfRT0RtoHzWWSN9YEucSbMJTHaMhz7dVICc=
+github.com/konflux-ci/application-api v0.0.0-20251126155256-d24742e8b026 h1:Y6oKDSxmDY7JiNsrPm0ZRUcW+9cv20B71DuitI3sl28=
+github.com/konflux-ci/application-api v0.0.0-20251126155256-d24742e8b026/go.mod h1:948Z+a1IbfRT0RtoHzWWSN9YEucSbMJTHaMhz7dVICc=
 github.com/konflux-ci/image-controller v0.0.0-20251125094047-76c6fbd56498 h1:yrZYsUjN9EBybByAS4BkRgvjYe9EL1vmBIinfdMuHvA=
 github.com/konflux-ci/image-controller v0.0.0-20251125094047-76c6fbd56498/go.mod h1:Ent1Lre+1HTYC7MNHqnYDxuxxAN5Yp0zqVP0oq+fGn8=
 github.com/konflux-ci/integration-service v0.0.0-20251124174539-674340350bad h1:zN7b8+qhyCA1WiqZv8O+2D/zirb3P35fu5LbUpg/xkc=
