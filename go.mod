@@ -7,7 +7,7 @@ toolchain go1.25.3
 require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.4.3
-	github.com/konflux-ci/application-api v0.0.0-20250324201748-5a9670bf7679
+	github.com/konflux-ci/application-api v0.0.0-20251126155256-d24742e8b026
 	github.com/konflux-ci/image-controller v0.0.0-20251125094047-76c6fbd56498
 	github.com/konflux-ci/integration-service v0.0.0-20251126180851-028646f9c66d
 	github.com/konflux-ci/release-service v0.0.0-20251126233216-3ff8e6283ba8
