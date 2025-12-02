@@ -39,5 +39,10 @@ LABEL description="Konflux Project Controller"
 LABEL com.redhat.component="Konflux Project Controller"
 LABEL io.k8s.description="Konflux Project Controller"
 LABEL io.k8s.display-name="konflux-project-controller"
+LABEL version="1.0"
+LABEL release="1"
+LABEL vendor="Red Hat, Inc."
+LABEL distribution-scope="public"
+LABEL url="https://github.com/konflux-ci/project-controller"
 
 ENTRYPOINT ["/manager"]
