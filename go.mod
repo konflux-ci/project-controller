@@ -1,6 +1,6 @@
 module github.com/konflux-ci/project-controller
 
-go 1.24.4
+go 1.24.9
 
 toolchain go1.25.3
 
@@ -10,8 +10,8 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20251210122215-555a927cf6d9
 	github.com/konflux-ci/image-controller v0.0.0-20260109192054-3f8501f57b8f
 	github.com/konflux-ci/integration-service v0.0.0-20260108133201-e2f5559a9544
-	github.com/konflux-ci/release-service v0.0.0-20251204201734-3fb3ff93c7ef
-	github.com/onsi/ginkgo/v2 v2.27.3
+	github.com/konflux-ci/release-service v0.0.0-20260110202725-cb33cfbe7a09
+	github.com/onsi/ginkgo/v2 v2.27.4
 	github.com/onsi/gomega v1.39.0
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
@@ -80,7 +80,7 @@ require (
 	github.com/google/cel-go v0.26.1 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20251206212654-f1b79c6b8239 // indirect
+	github.com/google/pprof v0.0.0-20260106004452-d7df1bf2cac7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -145,8 +145,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.34.2 // indirect
-	k8s.io/apiserver v0.34.2 // indirect
+	k8s.io/apiextensions-apiserver v0.34.3 // indirect
+	k8s.io/apiserver v0.34.3 // indirect
 	k8s.io/component-base v0.34.3 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e // indirect
