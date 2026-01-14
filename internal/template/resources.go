@@ -135,6 +135,8 @@ var supportedResourceTypes = []struct {
 		},
 		templateAbleFields: [][]string{
 			{"spec", "data", "releaseNotes", "references", "[]"},
+			{"spec", "tenantPipeline", "params", "[]", "value"},
+			{"spec", "tenantPipeline", "pipelineRef", "params", "[]", "value"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
