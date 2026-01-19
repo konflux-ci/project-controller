@@ -16,7 +16,7 @@ require (
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/client-go v11.0.0+incompatible
-	sigs.k8s.io/controller-runtime v0.22.4
+	sigs.k8s.io/controller-runtime v0.23.0
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
