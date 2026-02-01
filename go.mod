@@ -12,7 +12,7 @@ require (
 	github.com/konflux-ci/integration-service v0.0.0-20260126161721-c44e4774ac00
 	github.com/konflux-ci/release-service v0.0.0-20251204201734-3fb3ff93c7ef
 	github.com/onsi/ginkgo/v2 v2.28.1
-	github.com/onsi/gomega v1.39.0
+	github.com/onsi/gomega v1.39.1
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/client-go v11.0.0+incompatible
