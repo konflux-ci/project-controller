@@ -67,6 +67,7 @@ spec:
         git-provider-url: "{{.cool_git_provider_url}}"
         mintmaker.appstudio.redhat.com/disabled: "{{.mintmaker_disable}}"
         appstudio.openshift.io/request: "configure-pac"
+        build.appstudio.openshift.io/request: "configure-pac"
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"
