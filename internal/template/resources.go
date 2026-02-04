@@ -77,6 +77,7 @@ var supportedResourceTypes = []struct {
 		},
 		untouchableFields: [][]string{
 			{"metadata", "annotations", "appstudio.openshift.io/request"},
+			{"metadata", "annotations", "build.appstudio.openshift.io/request"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{
