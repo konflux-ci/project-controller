@@ -35,6 +35,8 @@ var supportedResourceTypes = []struct {
 	// Fields that should not be touched when applying templates. These fields
 	// will be preserved from existing resources and not created in new resources.
 	untouchableFields [][]string
+	// Fields that should be set only if creating new resources
+	createOnlyFields [][]string
 	// A field of the resource that points to its owner object. If nil, an
 	// owner record would not be set.
 	ownerNameField []string
@@ -77,6 +79,8 @@ var supportedResourceTypes = []struct {
 		},
 		untouchableFields: [][]string{
 			{"metadata", "annotations", "appstudio.openshift.io/request"},
+		},
+		createOnlyFields: [][]string{
 			{"metadata", "annotations", "build.appstudio.openshift.io/request"},
 		},
 		ownerNameField: []string{"spec", "application"},
@@ -95,6 +99,9 @@ var supportedResourceTypes = []struct {
 		},
 		templateAbleFields: [][]string{
 			{"spec", "image", "name"},
+		},
+		createOnlyFields: [][]string{
+			{"metadata", "annotations", "image-controller.appstudio.redhat.com/update-component-image"},
 		},
 		ownerNameField: []string{"metadata", "labels", "appstudio.redhat.com/component"},
 		ownerAPI: apischema.GroupVersionKind{
@@ -305,5 +312,32 @@ func getVarValues(
 func removeUntouchableFields(resource *unstructured.Unstructured, untouchableFields [][]string) {
 	for _, fieldPath := range untouchableFields {
 		unstructured.RemoveNestedField(resource.Object, fieldPath...)
+	}
+}
+
+// HasCreateOnlyFields checks if the resource has any create only fields.
+func HasCreateOnlyFields(resource *unstructured.Unstructured) bool {
+	for _, srt := range supportedResourceTypes {
+		if findGVK(srt.supportedAPIs, resource.GroupVersionKind()) {
+			for _, fieldPath := range srt.createOnlyFields {
+				if _, ok, _ := unstructured.NestedFieldNoCopy(resource.Object, fieldPath...); ok {
+					return true
+				}
+			}
+			return false
+		}
+	}
+	return false
+}
+
+// RemoveCreateOnlyFields removes the create only fields from the resource object.
+func RemoveCreateOnlyFields(resource *unstructured.Unstructured) {
+	for _, srt := range supportedResourceTypes {
+		if findGVK(srt.supportedAPIs, resource.GroupVersionKind()) {
+			for _, fieldPath := range srt.createOnlyFields {
+				unstructured.RemoveNestedField(resource.Object, fieldPath...)
+			}
+			return
+		}
 	}
 }
