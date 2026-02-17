@@ -167,6 +167,16 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, log logr.Logger, resource *unstructured.Unstructured) bool {
+	if template.HasCreateOnlyFields(resource) {
+		exists, err := r.resourceExists(ctx, resource)
+		if err != nil {
+			log.Error(err, "Failed to check if resource exists: %s [%s]", resource.GetName(), resource.GetKind())
+			return true
+		}
+		if exists {
+			template.RemoveCreateOnlyFields(resource)
+		}
+	}
 	err := r.Client.Patch(
 		ctx,
 		resource,
@@ -287,4 +297,21 @@ func (r *ProjectDevelopmentStreamReconciler) SetupWithManager(mgr ctrl.Manager) 
 			getSameNSEventHandler(r),
 		).
 		Complete(r)
+}
+
+// resourceExists checks if the resource exists in the cluster
+func (r *ProjectDevelopmentStreamReconciler) resourceExists(ctx context.Context, resource *unstructured.Unstructured) (bool, error) {
+	existing := unstructured.Unstructured{}
+	existing.SetAPIVersion(resource.GetAPIVersion())
+	existing.SetKind(resource.GetKind())
+	existing.SetName(resource.GetName())
+	existing.SetNamespace(resource.GetNamespace())
+	err := r.Client.Get(ctx, client.ObjectKeyFromObject(&existing), &existing)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

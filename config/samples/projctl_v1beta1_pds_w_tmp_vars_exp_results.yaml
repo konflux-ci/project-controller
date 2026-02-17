@@ -52,6 +52,7 @@ metadata:
     git-provider: github
     git-provider-url: https://github.com
     mintmaker.appstudio.redhat.com/disabled: "false"
+    build.appstudio.openshift.io/request: "configure-pac"
   ownerReferences:
   - apiVersion: "appstudio.redhat.com/v1alpha1"
     kind: "Application"
