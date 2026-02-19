@@ -90,9 +90,6 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 	// Update context with the enriched logger so that setReadyCondition can use it
 	ctx = ctrl.LoggerInto(ctx, log)
 
-	// Set initial condition
-	_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "Reconciling", "Reconciling ProjectDevelopmentStream")
-
 	// This is arguably better done in an admission hook, but its easier to test
 	// when doing this from the controller
 	if !r.checkProductOwnerRef(pds) {
@@ -210,6 +207,10 @@ func (r *ProjectDevelopmentStreamReconciler) checkProductOwnerRef(pds projctlv1b
 }
 
 func (r *ProjectDevelopmentStreamReconciler) setProductOwnerRef(ctx context.Context, pds *projctlv1beta1.ProjectDevelopmentStream) error {
+	// Re-fetch so we have the latest resourceVersion (e.g. after a status apply earlier in reconcile).
+	if err := r.Get(ctx, client.ObjectKeyFromObject(pds), pds); err != nil {
+		return err
+	}
 	projectKey := client.ObjectKey{Namespace: pds.GetNamespace(), Name: pds.Spec.Project}
 	project := projctlv1beta1.Project{}
 	if err := r.Client.Get(ctx, projectKey, &project); err != nil {
@@ -256,28 +257,33 @@ func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Conte
 		Reason:             reason,
 		Message:            message,
 	}
-
-	// Find and update existing Ready condition
-	for i, existing := range pds.Status.Conditions {
-		if existing.Type == ConditionTypeReady {
-			// Preserve LastTransitionTime when status hasn't changed per Kubernetes API conventions.
-			// LastTransitionTime should only update when the condition's status field transitions
-			// (True/False/Unknown), not when reason or message changes.
-			if existing.Status == status {
-				condition.LastTransitionTime = existing.LastTransitionTime
-			}
-			pds.Status.Conditions[i] = condition
-			if err := r.Status().Update(ctx, pds); err != nil {
-				log.Error(err, "Failed to update Ready condition", "reason", reason)
-				return err
-			}
-			return nil
+	// Preserve LastTransitionTime when status hasn't changed per Kubernetes API conventions.
+	for _, existing := range pds.Status.Conditions {
+		if existing.Type == ConditionTypeReady && existing.Status == status {
+			condition.LastTransitionTime = existing.LastTransitionTime
+			break
 		}
 	}
 
-	// Condition not found, append new one
-	pds.Status.Conditions = append(pds.Status.Conditions, condition)
-	if err := r.Status().Update(ctx, pds); err != nil {
+	// Build a minimal object for server-side apply: only GVK, Namespace/Name, and our status.
+	// This avoids sending uid, resourceVersion, or other metadata that can cause apply to fail.
+	gvk, err := r.GroupVersionKindFor(pds)
+	if err != nil {
+		log.Error(err, "Failed to get GVK for ProjectDevelopmentStream")
+		return err
+	}
+	applyObj := &projctlv1beta1.ProjectDevelopmentStream{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: pds.Namespace,
+			Name:      pds.Name,
+		},
+		Status: projctlv1beta1.ProjectDevelopmentStreamStatus{
+			Conditions: []metav1.Condition{condition},
+		},
+	}
+	applyObj.GetObjectKind().SetGroupVersionKind(gvk)
+
+	if err := r.Status().Patch(ctx, applyObj, client.Apply, client.FieldOwner("projctl.konflux.dev")); err != nil {
 		log.Error(err, "Failed to update Ready condition", "reason", reason)
 		return err
 	}
