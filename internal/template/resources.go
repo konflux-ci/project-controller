@@ -140,6 +140,7 @@ var supportedResourceTypes = []struct {
 			{"metadata", "name"},
 			{"metadata", "labels", "release.appstudio.openshift.io/releasePlanAdmission"},
 			{"spec", "application"},
+			{"spec", "finalPipeline", "serviceAccountName"},
 		},
 		templateAbleFields: [][]string{
 			{"spec", "data", "releaseNotes", "references", "[]"},

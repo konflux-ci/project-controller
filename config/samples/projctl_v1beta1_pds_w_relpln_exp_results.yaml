@@ -117,6 +117,17 @@ spec:
   application: "cool-app-4-4-0"
   releaseGracePeriodDays: 7
   target: cool-app-releng-tenant
+  finalPipeline:
+    serviceAccountName: "build-pipeline-cool-app-4-4-0"
+    pipelineRef:
+      resolver: git
+      params:
+        - name: url
+          value: "https://github.com/konflux-ci/build-definitions"
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: pipelines/release.yaml
   data:
     releaseNotes:
       description: "Description"
