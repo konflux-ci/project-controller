@@ -22,3 +22,7 @@ go.work
 
 # Kubebuilder stuff
 bin/
+
+# Mise tools
+.vscode/mise-tools/
+

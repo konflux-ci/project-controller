@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -49,7 +49,7 @@ const (
 type ProjectDevelopmentStreamReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
+	Recorder events.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=projctl.konflux.dev,resources=projectdevelopmentstreams,verbs=get;list;watch;create;update;patch;delete
@@ -265,14 +265,14 @@ func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Conte
 		}
 	}
 
-	// Build a minimal object for server-side apply: only GVK, Namespace/Name, and our status.
-	// This avoids sending uid, resourceVersion, or other metadata that can cause apply to fail.
+	// Server-side apply status using the new API (client.ApplyConfigurationFromUnstructured +
+	// Status().Apply) so the server merges and tracks field ownership.
 	gvk, err := r.GroupVersionKindFor(pds)
 	if err != nil {
 		log.Error(err, "Failed to get GVK for ProjectDevelopmentStream")
 		return err
 	}
-	applyObj := &projctlv1beta1.ProjectDevelopmentStream{
+	applyStatus := &projctlv1beta1.ProjectDevelopmentStream{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: pds.Namespace,
 			Name:      pds.Name,
@@ -281,9 +281,14 @@ func (r *ProjectDevelopmentStreamReconciler) setReadyCondition(ctx context.Conte
 			Conditions: []metav1.Condition{condition},
 		},
 	}
-	applyObj.GetObjectKind().SetGroupVersionKind(gvk)
-
-	if err := r.Status().Patch(ctx, applyObj, client.Apply, client.FieldOwner("projctl.konflux.dev")); err != nil {
+	applyStatus.GetObjectKind().SetGroupVersionKind(gvk)
+	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(applyStatus)
+	if err != nil {
+		log.Error(err, "Failed to convert status to unstructured")
+		return err
+	}
+	applyObj := &unstructured.Unstructured{Object: u}
+	if err := r.Status().Apply(ctx, client.ApplyConfigurationFromUnstructured(applyObj), client.FieldOwner("projctl.konflux.dev")); err != nil {
 		log.Error(err, "Failed to update Ready condition", "reason", reason)
 		return err
 	}

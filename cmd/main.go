@@ -128,7 +128,7 @@ func main() {
 	if err = (&controller.ProjectDevelopmentStreamReconciler{
 		Client:   mgr.GetClient(),
 		Scheme:   mgr.GetScheme(),
-		Recorder: mgr.GetEventRecorderFor("ProjectDevelopmentStream-controller"),
+		Recorder: mgr.GetEventRecorder("ProjectDevelopmentStream-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ProjectDevelopmentStream")
 		os.Exit(1)
