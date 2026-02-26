@@ -10,14 +10,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 
 	"github.com/konflux-ci/project-controller/pkg/logr/eventr"
 )
 
 var _ = Describe("Eventr", func() {
 	var (
-		recorder            *record.FakeRecorder
+		recorder            *events.FakeRecorder
 		object              runtime.Object
 		logger              logr.Logger
 		someErr             error
@@ -25,8 +25,7 @@ var _ = Describe("Eventr", func() {
 	)
 
 	BeforeEach(func() {
-		recorder = record.NewFakeRecorder(10)
-		recorder.IncludeObject = true
+		recorder = events.NewFakeRecorder(10)
 
 		object = &corev1.ConfigMap{
 			TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "ConfigMap"},
@@ -37,7 +36,7 @@ var _ = Describe("Eventr", func() {
 		expectRecorderEvent = func(eventType, reason, message string) {
 			GinkgoHelper()
 			Expect(recorder.Events).Should(Receive(Equal(
-				fmt.Sprintf("%s %s %s involvedObject{kind=ConfigMap,apiVersion=v1}", eventType, reason, message),
+				fmt.Sprintf("%s %s %s", eventType, reason, message),
 			)))
 		}
 
