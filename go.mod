@@ -8,7 +8,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260213151620-9ac61f5d7ca0
 	github.com/konflux-ci/image-controller v0.0.0-20260213161326-0489fa4f7ffb
 	github.com/konflux-ci/integration-service v0.0.0-20260225110119-0d5df4fb3d7b
-	github.com/konflux-ci/release-service v0.0.0-20260224083316-181cbab45f7b
+	github.com/konflux-ci/release-service v0.0.0-20260226221622-b266636b9d16
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	k8s.io/api v0.35.1
@@ -132,8 +132,8 @@ require (
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
-	google.golang.org/api v0.267.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260217215200-42d3e9bedb6d // indirect
+	google.golang.org/api v0.269.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260223185530-2f722ef697dc // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260223185530-2f722ef697dc // indirect
 	google.golang.org/grpc v1.79.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
