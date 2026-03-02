@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"go/build"
+	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -58,6 +59,7 @@ var k8sClient client.Client
 var saClient client.Client
 var saCluster cluster.Cluster
 var testEnv *envtest.Environment
+var applicationAPICrdTempDir string
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -76,6 +78,33 @@ func apiObjCrdPath(apiObj interface{}) string {
 	return filepath.Join(appApiSrcImport.Dir, "..", "..", "config", "crd", "bases")
 }
 
+// applicationAPICrdPath returns a path to a temp dir containing application-api CRDs
+// excluding ComponentDetectionQueries, whose CEL validation rules exceed envtest's cost budget.
+func applicationAPICrdPath() string {
+	basePath := apiObjCrdPath(applicaitonapiv1alpha1.Application{})
+	entries, err := os.ReadDir(basePath)
+	Expect(err).NotTo(HaveOccurred())
+	tmpDir, err := os.MkdirTemp("", "project-controller-application-api-crds-")
+	Expect(err).NotTo(HaveOccurred())
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		// Skip CRDs whose x-kubernetes-validations exceed CEL cost budget in envtest.
+		switch e.Name() {
+		case "appstudio.redhat.com_componentdetectionqueries.yaml",
+			"appstudio.redhat.com_snapshots.yaml":
+			continue
+		}
+		src := filepath.Join(basePath, e.Name())
+		dst := filepath.Join(tmpDir, e.Name())
+		data, err := os.ReadFile(src)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(os.WriteFile(dst, data, 0o644)).To(Succeed())
+	}
+	return tmpDir
+}
+
 var _ = BeforeSuite(func() {
 	var err error
 
@@ -83,10 +112,11 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 
+	applicationAPICrdTempDir = applicationAPICrdPath()
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crd", "bases"),
-			apiObjCrdPath(applicaitonapiv1alpha1.Application{}),
+			applicationAPICrdTempDir,
 			apiObjCrdPath(imagectrlapiv1alpha1.ImageRepository{}),
 			apiObjCrdPath(intgtstscnariov1beta2.IntegrationTestScenario{}),
 			apiObjCrdPath(releasev1alpha1.ReleasePlan{}),
@@ -99,7 +129,7 @@ var _ = BeforeSuite(func() {
 		// Note that you must have the required binaries setup under the bin directory to perform
 		// the tests directly. When we run make test it will be setup and used automatically.
 		BinaryAssetsDirectory: filepath.Join("..", "..", "bin", "k8s",
-			fmt.Sprintf("1.29.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
+			fmt.Sprintf("1.30.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
 	// cfg is defined in this file globally.
@@ -137,6 +167,9 @@ var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+	if applicationAPICrdTempDir != "" {
+		Expect(os.RemoveAll(applicationAPICrdTempDir)).To(Succeed())
+	}
 })
 
 func setupSystemNamespace(ctx context.Context, client client.Client) {
