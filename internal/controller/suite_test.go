@@ -78,8 +78,10 @@ func apiObjCrdPath(apiObj interface{}) string {
 	return filepath.Join(appApiSrcImport.Dir, "..", "..", "config", "crd", "bases")
 }
 
-// applicationAPICrdPath returns a path to a temp dir containing application-api CRDs
-// excluding ComponentDetectionQueries, whose CEL validation rules exceed envtest's cost budget.
+// applicationAPICrdPath returns a path to a temp dir containing application-api CRDs,
+// excluding those whose x-kubernetes-validations exceed envtest's CEL cost budget:
+// - appstudio.redhat.com_componentdetectionqueries.yaml
+// - appstudio.redhat.com_snapshots.yaml
 func applicationAPICrdPath() string {
 	basePath := apiObjCrdPath(applicaitonapiv1alpha1.Application{})
 	entries, err := os.ReadDir(basePath)
@@ -90,7 +92,6 @@ func applicationAPICrdPath() string {
 		if e.IsDir() {
 			continue
 		}
-		// Skip CRDs whose x-kubernetes-validations exceed CEL cost budget in envtest.
 		switch e.Name() {
 		case "appstudio.redhat.com_componentdetectionqueries.yaml",
 			"appstudio.redhat.com_snapshots.yaml":
@@ -113,6 +114,11 @@ var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
 
 	applicationAPICrdTempDir = applicationAPICrdPath()
+	DeferCleanup(func() {
+		if applicationAPICrdTempDir != "" {
+			_ = os.RemoveAll(applicationAPICrdTempDir)
+		}
+	})
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crd", "bases"),
@@ -167,9 +173,6 @@ var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
-	if applicationAPICrdTempDir != "" {
-		Expect(os.RemoveAll(applicationAPICrdTempDir)).To(Succeed())
-	}
 })
 
 func setupSystemNamespace(ctx context.Context, client client.Client) {
