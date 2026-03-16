@@ -4,8 +4,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/konflux-ci/project-controller/internal/ownership"
 	projctlv1beta1 "github.com/konflux-ci/project-controller/api/v1beta1"
+	"github.com/konflux-ci/project-controller/internal/ownership"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
