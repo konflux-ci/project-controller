@@ -5,8 +5,8 @@ go 1.25.6
 require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.4.3
-	github.com/konflux-ci/application-api v0.0.0-20260227162358-54003501911b
-	github.com/konflux-ci/image-controller v0.0.0-20260213161326-0489fa4f7ffb
+	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
+	github.com/konflux-ci/image-controller v0.0.0-20260327175801-5e469d127233
 	github.com/konflux-ci/integration-service v0.0.0-20260226102759-5a5e1b2ab06b
 	github.com/konflux-ci/release-service v0.0.0-20260226221622-b266636b9d16
 	github.com/onsi/ginkgo/v2 v2.28.1
