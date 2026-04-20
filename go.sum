@@ -42,8 +42,8 @@ github.com/emicklei/go-restful/v3 v3.13.0 h1:C4Bl2xDndpU6nJ4bc1jXd+uTmYPVUwkD6bF
 github.com/emicklei/go-restful/v3 v3.13.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
-github.com/evanphx/json-patch v5.9.0+incompatible h1:fBXyNpNMuTTDdquAq/uisOr2lShz4oaXpDTX2bLe7ls=
-github.com/evanphx/json-patch v5.9.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
+github.com/evanphx/json-patch v5.9.11+incompatible h1:ixHHqfcGvxhWkniF1tWxBHA0yb4Z+d1UQi45df52xW8=
+github.com/evanphx/json-patch v5.9.11+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
@@ -163,8 +163,8 @@ github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17 h1:auNv
 github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17/go.mod h1:948Z+a1IbfRT0RtoHzWWSN9YEucSbMJTHaMhz7dVICc=
 github.com/konflux-ci/image-controller v0.0.0-20260213161326-0489fa4f7ffb h1:wlYdzATqXLB4NW0TbmwJ2jHMYeZtFKe8TfczLl+F9Cc=
 github.com/konflux-ci/image-controller v0.0.0-20260213161326-0489fa4f7ffb/go.mod h1:SnXXszTepxMVF+figL71MI/rZoLOlnet9e93YehqqvE=
-github.com/konflux-ci/integration-service v0.0.0-20260226102759-5a5e1b2ab06b h1:kgL8sh/2HvkNeWDKdLqoqyXVVClV/ewQJgAW79NF8eg=
-github.com/konflux-ci/integration-service v0.0.0-20260226102759-5a5e1b2ab06b/go.mod h1:Y3GYFt4is4oyPwqTU2pgTvLCeudeYxS/iWWfe/ncgS8=
+github.com/konflux-ci/integration-service v0.0.0-20260420152126-bac20dc3f1f7 h1:8QB9FaYiQu8w9Pc/vj4OKMVavG3rxshmPFXGFNw54I4=
+github.com/konflux-ci/integration-service v0.0.0-20260420152126-bac20dc3f1f7/go.mod h1:q9u7odg5lJtsJQETdkZGs9YveRgQw0IVCl+b3137L2w=
 github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 h1:iGsPIR8Jjo9z0OAgLcrw7uKT/xWqWg/j+D1tr10snkM=
 github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
 github.com/konflux-ci/release-service v0.0.0-20260420123405-4ca3fd09bf05 h1:OXzjeHsmCVfGZohnUuU0NGxiR+raULRXTeYF+bgBezU=
