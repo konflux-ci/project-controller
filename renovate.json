@@ -38,6 +38,20 @@
       ]
     },
     {
+      "description": "Disable major version updates for indirect Go dependencies since they are resolved by go mod tidy based on direct dependency requirements",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Auto-merge non-major Go module updates",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true,
+      "autoApprove": true
+    },
+    {
       "description": "Auto-merge Go toolchain patch updates only",
       "matchPackageNames": [
         "go"
