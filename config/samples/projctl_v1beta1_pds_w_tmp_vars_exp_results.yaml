@@ -60,6 +60,7 @@ metadata:
 spec:
   application: "cool-app-1-0-0"
   componentName: "cool-comp1-1-0-0"
+  containerImage: "quay.io/redhat-user-workloads/test-tenant/cool-comp1-1-0-0"
   source:
     git:
       context: "./"

@@ -71,6 +71,7 @@ spec:
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"
+      containerImage: "quay.io/redhat-user-workloads/test-tenant/cool-comp1-{{.versionName}}"
       source:
         git:
           context: "{{.cool_comp1_context}}"

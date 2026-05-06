@@ -70,6 +70,7 @@ var supportedResourceTypes = []struct {
 			{"metadata", "annotations", "mintmaker.appstudio.redhat.com/disabled"},
 		},
 		templateAbleFields: [][]string{
+			{"spec", "containerImage"},
 			{"spec", "source", "git", "context"},
 			{"spec", "source", "git", "dockerfileUrl"},
 			{"spec", "source", "git", "revision"},

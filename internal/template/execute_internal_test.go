@@ -24,4 +24,10 @@ var _ = DescribeTable(
 		map[string]string{"version": "1.2.3"},
 		"1-2-3",
 	),
+	Entry(
+		"with newline inside delimiters (as produced by YAML line wrapping after parsing)",
+		"quay.io/tenant/comp-{{\n      .versionName }}:tag",
+		map[string]string{"versionName": "4-22"},
+		"quay.io/tenant/comp-4-22:tag",
+	),
 )
