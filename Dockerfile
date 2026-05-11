@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1778171507 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
-ENV GOTOOLCHAIN=auto
+ENV GOTOOLCHAIN=local
 WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod
