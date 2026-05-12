@@ -8,7 +8,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/image-controller v0.0.0-20260428123836-67cc74626bb7
 	github.com/konflux-ci/integration-service v0.0.0-20260511174726-97f400b4cec8
-	github.com/konflux-ci/release-service v0.0.0-20260510232916-5118cd16490e
+	github.com/konflux-ci/release-service v0.0.0-20260512085508-5adcb9b335ca
 	github.com/onsi/ginkgo/v2 v2.28.3
 	github.com/onsi/gomega v1.40.0
 	k8s.io/api v0.35.4
@@ -143,7 +143,7 @@ require (
 	k8s.io/apiserver v0.35.4 // indirect
 	k8s.io/component-base v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20260509192518-b540ad9def2b // indirect
+	k8s.io/kube-openapi v0.0.0-20260511211612-da4e56fe5676 // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	knative.dev/pkg v0.0.0-20260507212125-df317a52d112 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.34.0 // indirect
