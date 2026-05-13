@@ -169,8 +169,8 @@ github.com/konflux-ci/integration-service v0.0.0-20260511174726-97f400b4cec8 h1:
 github.com/konflux-ci/integration-service v0.0.0-20260511174726-97f400b4cec8/go.mod h1:y9lxuVx6qHecCDjzq1l0EKN94Ha3AFGmChOyCM5GmiA=
 github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 h1:iGsPIR8Jjo9z0OAgLcrw7uKT/xWqWg/j+D1tr10snkM=
 github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68/go.mod h1:pSxVvl3jAjQQG352j9gsxOegTQeY+1SGbVyEXj/PRDQ=
-github.com/konflux-ci/release-service v0.0.0-20260512085508-5adcb9b335ca h1:mnr4Eei0L+44WKBeLhZ6dTHPm2yZMS5hKEBmjgzcp9Q=
-github.com/konflux-ci/release-service v0.0.0-20260512085508-5adcb9b335ca/go.mod h1:dyW8uR++JQOl5MmL9EYDoRe0G1sv1HAWic5XE5X5JNk=
+github.com/konflux-ci/release-service v0.0.0-20260512192203-aff948e20afd h1:J+rKObLtqqlaFmiF6Xsy66GjE5Tmw/ro7mXtqFFFoFw=
+github.com/konflux-ci/release-service v0.0.0-20260512192203-aff948e20afd/go.mod h1:F8j2wLGkLOYtAUfeE1Hw5BxhsKm7IERYFPux1GBQTjc=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
