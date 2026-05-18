@@ -23,5 +23,12 @@ jobs:
       with:
         go-version-file: go.mod
 
+    - name: Check AGENTS.md line limit
+      run: |
+        MAX_LINES=60
+        LINES=$(grep -c '' AGENTS.md)
+        echo "AGENTS.md has $LINES lines (limit: $MAX_LINES)"
+        [ "$LINES" -lt "$MAX_LINES" ] || { echo "AGENTS.md must be under $MAX_LINES lines"; exit 1; }
+
     - name: Run Lint
       run: make lint
