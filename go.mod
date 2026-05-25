@@ -8,7 +8,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/image-controller v0.0.0-20260515075456-addab0bfd9dc
 	github.com/konflux-ci/integration-service v0.0.0-20260518084447-9aeae33fc532
-	github.com/konflux-ci/release-service v0.0.0-20260515132335-ee9be6f1f9f3
+	github.com/konflux-ci/release-service v0.0.0-20260525024025-a9c72e448743
 	github.com/onsi/ginkgo/v2 v2.29.0
 	github.com/onsi/gomega v1.41.0
 	k8s.io/api v0.35.4
@@ -133,7 +133,7 @@ require (
 	golang.org/x/tools v0.45.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260519071638-aa98bba5eb94 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260519071638-aa98bba5eb94 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260523011958-0a33c5d7ca68 // indirect
 	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
@@ -143,7 +143,7 @@ require (
 	k8s.io/apiserver v0.35.4 // indirect
 	k8s.io/component-base v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20260512234627-ef417d054102 // indirect
+	k8s.io/kube-openapi v0.0.0-20260520065146-aa012df4f4af // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	knative.dev/pkg v0.0.0-20260507212125-df317a52d112 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.34.0 // indirect
