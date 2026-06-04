@@ -1,6 +1,6 @@
 module github.com/konflux-ci/project-controller
 
-go 1.25.7
+go 1.26
 
 require (
 	github.com/gertd/go-pluralize v0.2.1
@@ -11,8 +11,8 @@ require (
 	github.com/konflux-ci/release-service v0.0.0-20260525024025-a9c72e448743
 	github.com/onsi/ginkgo/v2 v2.29.0
 	github.com/onsi/gomega v1.41.0
-	k8s.io/api v0.35.4
-	k8s.io/apimachinery v0.35.4
+	k8s.io/api v0.35.5
+	k8s.io/apimachinery v0.35.5
 	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.23.3
 )
@@ -98,7 +98,7 @@ require (
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/tektoncd/pipeline v1.12.0 // indirect
+	github.com/tektoncd/pipeline v1.13.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -120,7 +120,7 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
@@ -139,9 +139,9 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	k8s.io/apiextensions-apiserver v0.35.4 // indirect
-	k8s.io/apiserver v0.35.4 // indirect
-	k8s.io/component-base v0.35.4 // indirect
+	k8s.io/apiextensions-apiserver v0.35.5 // indirect
+	k8s.io/apiserver v0.35.5 // indirect
+	k8s.io/component-base v0.35.5 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260520065146-aa012df4f4af // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
