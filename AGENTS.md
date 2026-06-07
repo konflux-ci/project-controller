@@ -48,8 +48,18 @@ make generate       # regenerate deepcopy after changing api/v1beta1/ types
 4. Server-side applies each resource (field owner: `projctl.konflux.dev`)
 5. Sets Ready condition on PDS status
 
+## Skills
+
+Detailed guides live in `skills/` — each subdirectory contains a `SKILL.md` with instructions.
+
+| Skill | Use when |
+|-------|----------|
+| [add-template-field](skills/add-template-field/SKILL.md) | Parametrizing CR fields in PDST templates, editing `templateAbleFields` / `templateAbleNameFields`, or template substitution test fixtures |
+| [local-dev-setup](skills/local-dev-setup/SKILL.md) | Running project-controller on local Konflux (Kind), E2E template verification, `make run` / `make deploy` against `kind-konflux` |
+
 ## Rules
 
+- **Template-able field PRs:** Apply **add-template-field** (`skills/add-template-field/SKILL.md`) and follow its workflow — do not summarize the allowlist process from memory.
 - Always run `make test` before submitting — it includes fmt, vet, generate, and manifests
 - RBAC markers live in two places: `internal/controller/` and `internal/template/resources.go`
 - Run `make manifests` after any RBAC marker change

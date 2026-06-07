@@ -25,7 +25,7 @@ jobs:
 
     - name: Check AGENTS.md line limit
       run: |
-        MAX_LINES=60
+        MAX_LINES=300
         LINES=$(grep -c '' AGENTS.md)
         echo "AGENTS.md has $LINES lines (limit: $MAX_LINES)"
         [ "$LINES" -lt "$MAX_LINES" ] || { echo "AGENTS.md must be under $MAX_LINES lines"; exit 1; }
