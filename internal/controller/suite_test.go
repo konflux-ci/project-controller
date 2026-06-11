@@ -48,7 +48,7 @@ import (
 	imagectrlapiv1alpha1 "github.com/konflux-ci/image-controller/api/v1alpha1"
 	intgtstscnariov1beta2 "github.com/konflux-ci/integration-service/api/v1beta2"
 	releasev1alpha1 "github.com/konflux-ci/release-service/api/v1alpha1"
-	//+kubebuilder:scaffold:imports
+	// +kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -101,7 +101,7 @@ func applicationAPICrdPath() string {
 		dst := filepath.Join(tmpDir, e.Name())
 		data, err := os.ReadFile(src)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(os.WriteFile(dst, data, 0o644)).To(Succeed())
+		Expect(os.WriteFile(dst, data, 0o644)).To(Succeed()) //nolint:gosec // dst under test tmpDir from trusted CRD fixture names
 	}
 	return tmpDir
 }
@@ -146,7 +146,7 @@ var _ = BeforeSuite(func() {
 	err = projctlv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	//+kubebuilder:scaffold:scheme
+	// +kubebuilder:scaffold:scheme
 
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
@@ -175,19 +175,19 @@ var _ = AfterSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 })
 
-func setupSystemNamespace(ctx context.Context, client client.Client) {
+func setupSystemNamespace(ctx context.Context, k8sClient client.Client) {
 	ns := corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "system"}}
-	Expect(client.Create(ctx, &ns)).To(Or(
+	Expect(k8sClient.Create(ctx, &ns)).To(Or(
 		Succeed(),
 		MatchError(apierrors.IsAlreadyExists, "IsAlreadyExists"),
 	))
 }
 
-func setupServiceAccount(ctx context.Context, client client.Client) {
+func setupServiceAccount(ctx context.Context, k8sClient client.Client) {
 	saFiles := []string{"role", "service_account", "role_binding"}
 	for _, saFile := range saFiles {
 		testhelpers.ApplyFile(
-			ctx, client,
+			ctx, k8sClient,
 			filepath.Join("..", "..", "config", "rbac", fmt.Sprintf("%s.yaml", saFile)),
 			"system",
 		)

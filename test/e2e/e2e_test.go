@@ -61,9 +61,10 @@ var _ = Describe("controller", Ordered, func() {
 
 			// projectimage stores the name of the image used in the example
 			var projectimage = "example.com/project-controller:v0.0.1"
+			imgFlag := fmt.Sprintf("IMG=%s", projectimage)
 
 			By("building the manager(Operator) image")
-			cmd := exec.Command("make", "docker-build", fmt.Sprintf("IMG=%s", projectimage))
+			cmd := exec.Command("make", "docker-build", imgFlag) //nolint:gosec // e2e fixed image
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
@@ -76,7 +77,7 @@ var _ = Describe("controller", Ordered, func() {
 			_, _ = utils.Run(cmd)
 
 			By("deploying the controller-manager")
-			cmd = exec.Command("make", "deploy", fmt.Sprintf("IMG=%s", projectimage))
+			cmd = exec.Command("make", "deploy", imgFlag) //nolint:gosec // e2e fixed image
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
@@ -103,7 +104,7 @@ var _ = Describe("controller", Ordered, func() {
 				ExpectWithOffset(2, controllerPodName).Should(ContainSubstring("controller-manager"))
 
 				// Validate pod status
-				cmd = exec.Command("kubectl", "get",
+				cmd = exec.Command("kubectl", "get", //nolint:gosec // e2e pod name from prior kubectl query
 					"pods", controllerPodName, "-o", "jsonpath={.status.phase}",
 					"-n", namespace,
 				)

@@ -38,7 +38,7 @@ type ProjectSpec struct {
 	Description string `json:"description,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // Project represents a Konflux project for organizing related development streams.
 // No custom labels or annotations on Project alter controller behavior.
@@ -49,7 +49,7 @@ type Project struct {
 	Spec ProjectSpec `json:"spec,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // ProjectList contains a list of Project
 type ProjectList struct {

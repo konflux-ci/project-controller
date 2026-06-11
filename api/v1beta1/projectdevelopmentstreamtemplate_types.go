@@ -58,8 +58,8 @@ type ProjectDevelopmentStreamTemplateSpec struct {
 	Resources []UnstructuredObj `json:"resources,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // ProjectDevelopmentStreamTemplate defines a reusable set of resources
 // that a ProjectDevelopmentStream can instantiate using variable values.
@@ -71,7 +71,7 @@ type ProjectDevelopmentStreamTemplate struct {
 	Spec ProjectDevelopmentStreamTemplateSpec `json:"spec,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // ProjectDevelopmentStreamTemplateList contains a list of ProjectDevelopmentStreamTemplate
 type ProjectDevelopmentStreamTemplateList struct {

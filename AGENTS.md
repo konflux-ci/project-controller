@@ -14,7 +14,7 @@ Only PDS has a reconciler. Changes to Project or Template trigger PDS re-reconci
 ```bash
 make build          # binary → bin/manager
 make test           # unit tests (envtest), also runs fmt/vet/generate
-make lint           # golangci-lint
+make lint           # golangci-lint v2 (gosec, revive, ginkgolinter, etc.)
 make lint-fix       # golangci-lint with --fix
 make manifests      # regenerate CRDs + RBAC after changing kubebuilder markers
 make generate       # regenerate deepcopy after changing api/v1beta1/ types
@@ -61,6 +61,7 @@ Detailed guides live in `skills/` — each subdirectory contains a `SKILL.md` wi
 
 - **Template-able field PRs:** Apply **add-template-field** (`skills/add-template-field/SKILL.md`) and follow its workflow — do not summarize the allowlist process from memory.
 - Always run `make test` before submitting — it includes fmt, vet, generate, and manifests
+- CI also runs `yaml-lint` (yamllint) and enforces the AGENTS.md line limit via `go-lint.yml`
 - RBAC markers live in two places: `internal/controller/` and `internal/template/resources.go`
 - Run `make manifests` after any RBAC marker change
 - Tests use Ginkgo/Gomega with envtest, impersonating `system:serviceaccount:system:controller-manager`
