@@ -161,6 +161,32 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 	)
 })
 
+var _ = Describe("checkProductOwnerRef", func() {
+	var reconciler *ProjectDevelopmentStreamReconciler
+
+	BeforeEach(func() {
+		reconciler = &ProjectDevelopmentStreamReconciler{
+			Client: k8sClient,
+			Scheme: k8sClient.Scheme(),
+		}
+	})
+
+	DescribeTable(
+		"reports whether the PDS already has the correct product owner reference",
+		func(pds projctlv1beta1.ProjectDevelopmentStream, expected bool) {
+			Expect(reconciler.checkProductOwnerRef(pds)).To(Equal(expected))
+		},
+		Entry("empty project", projctlv1beta1.ProjectDevelopmentStream{}, true),
+		Entry(
+			"project set without owner reference",
+			projctlv1beta1.ProjectDevelopmentStream{
+				Spec: projctlv1beta1.ProjectDevelopmentStreamSpec{Project: "project-sample"},
+			},
+			false,
+		),
+	)
+})
+
 func applySampleFile(ctx context.Context, k8sClient client.Client, fname string, ns string) {
 	testhelpers.ApplyFile(
 		ctx, k8sClient,
@@ -187,7 +213,7 @@ func setupTestNamespace(ctx context.Context, k8sClient client.Client) string {
 		}
 		// Add a random number to the name to make a unique NS name so we don't
 		// have to wait for the deletion to finish
-		nsName = fmt.Sprintf("test-ns-%d-%d", GinkgoParallelProcess(), rand.Intn(10000))
+		nsName = fmt.Sprintf("test-ns-%d-%d", GinkgoParallelProcess(), rand.Intn(10000)) //nolint:gosec // test namespace uniqueness
 	}
 	ns = corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName}}
 	Expect(k8sClient.Create(ctx, &ns)).To(Succeed())
@@ -197,9 +223,9 @@ func setupTestNamespace(ctx context.Context, k8sClient client.Client) string {
 	return nsName
 }
 
-func getPDS(ctx context.Context, client client.Client, nsn types.NamespacedName) projctlv1beta1.ProjectDevelopmentStream {
+func getPDS(ctx context.Context, k8sClient client.Client, nsn types.NamespacedName) projctlv1beta1.ProjectDevelopmentStream {
 	pds := &projctlv1beta1.ProjectDevelopmentStream{}
-	Expect(client.Get(ctx, nsn, pds)).To(Succeed())
+	Expect(k8sClient.Get(ctx, nsn, pds)).To(Succeed())
 	return *pds
 }
 

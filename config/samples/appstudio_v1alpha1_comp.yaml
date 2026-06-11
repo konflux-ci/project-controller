@@ -8,7 +8,7 @@ metadata:
     - test.appstudio.openshift.io/component
     - image-controller.appstudio.openshift.io/image-repository
     - image-registry-secret-sa-link.component.appstudio.openshift.io/finalizer
-    - pac.component.appstudio.openshift.io/finalizer  
+    - pac.component.appstudio.openshift.io/finalizer
 spec:
   application: "cool-app-5-5-0"
   componentName: "cool-comp1-5-5-0"

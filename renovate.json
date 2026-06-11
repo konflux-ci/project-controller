@@ -1,5 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "customManagers": [
+    {
+      "description": "Track golangci-lint version for make lint. File is version-only; must not contain extra lines.",
+      "customType": "regex",
+      "fileMatch": ["^\\.golangci-lint-version$"],
+      "matchStrings": ["^(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\\s*$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "golangci/golangci-lint",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "autoReplaceStringTemplate": "v{{{newValue}}}"
+    }
+  ],
   "automergeStrategy": "merge-commit",
   "platformAutomerge": true,
   "packageRules": [

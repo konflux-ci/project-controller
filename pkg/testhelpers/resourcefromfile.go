@@ -11,7 +11,7 @@ import (
 )
 
 func ResourceFromFile(path string, resource client.Object) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) //nolint:gosec // path is a test fixture file under config/samples
 	g.Expect(err).NotTo(g.HaveOccurred())
 	defer func() { _ = f.Close() }()
 	buf, err := io.ReadAll(f)

@@ -6,4 +6,3 @@ spec:
   project: project-sample
   template:
     name: nonexistent-template
-

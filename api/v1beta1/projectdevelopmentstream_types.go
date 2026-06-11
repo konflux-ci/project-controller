@@ -66,8 +66,8 @@ type ProjectDevelopmentStreamStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // ProjectDevelopmentStream represents an independent stream of development.
 // No custom labels or annotations on the object alter controller behavior.
@@ -79,7 +79,7 @@ type ProjectDevelopmentStream struct {
 	Status ProjectDevelopmentStreamStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // ProjectDevelopmentStreamList contains a list of ProjectDevelopmentStream
 type ProjectDevelopmentStreamList struct {
