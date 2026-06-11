@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check for changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62  # v47.0.0
         id: changed-files
         with:
           files: |
@@ -39,4 +39,4 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run yamllint
-        uses: frenck/action-yamllint@34b4bbcaeabedcfefad6adea8c5bbc42af0e2d47 # v1
+        uses: frenck/action-yamllint@34b4bbcaeabedcfefad6adea8c5bbc42af0e2d47  # v1
