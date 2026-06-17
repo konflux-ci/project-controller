@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -59,5 +60,8 @@ type ProjectList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&Project{}, &ProjectList{})
+	SchemeBuilder.Register(func(s *runtime.Scheme) error {
+		s.AddKnownTypes(GroupVersion, &Project{}, &ProjectList{})
+		return nil
+	})
 }

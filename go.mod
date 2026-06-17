@@ -1,6 +1,6 @@
 module github.com/konflux-ci/project-controller
 
-go 1.25.7
+go 1.26.0
 
 require (
 	github.com/gertd/go-pluralize v0.2.1
@@ -8,17 +8,17 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260603073049-dd8c9b1a64c2
 	github.com/konflux-ci/image-controller v0.0.0-20260529185104-b31f86d8dce9
 	github.com/konflux-ci/integration-service v0.0.0-20260615074849-8f9e64f5e138
-	github.com/konflux-ci/release-service v0.0.0-20260525024025-a9c72e448743
+	github.com/konflux-ci/release-service v0.0.0-20260612080155-c9a576f00b80
 	github.com/onsi/ginkgo/v2 v2.29.0
 	github.com/onsi/gomega v1.41.0
-	k8s.io/api v0.35.5
-	k8s.io/apimachinery v0.35.5
+	k8s.io/api v0.36.2
+	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v11.0.0+incompatible
-	sigs.k8s.io/controller-runtime v0.23.3
+	sigs.k8s.io/controller-runtime v0.24.1
 )
 
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
-replace k8s.io/client-go => k8s.io/client-go v0.35.3
+replace k8s.io/client-go => k8s.io/client-go v0.36.2
 
 replace github.com/google/cel-go => github.com/google/cel-go v0.28.1
 
@@ -68,7 +68,6 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.26.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
-	github.com/google/btree v1.1.3 // indirect
 	github.com/google/cel-go v0.28.1 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -98,7 +97,7 @@ require (
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/tektoncd/pipeline v1.12.0 // indirect
+	github.com/tektoncd/pipeline v1.13.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -139,11 +138,12 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	k8s.io/apiextensions-apiserver v0.35.5 // indirect
-	k8s.io/apiserver v0.35.5 // indirect
-	k8s.io/component-base v0.35.5 // indirect
+	k8s.io/apiextensions-apiserver v0.36.2 // indirect
+	k8s.io/apiserver v0.36.2 // indirect
+	k8s.io/component-base v0.36.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260603220949-865597e52e25 // indirect
+	k8s.io/streaming v0.36.2 // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	knative.dev/pkg v0.0.0-20260602142205-ac97e43f6622 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.36.0 // indirect
