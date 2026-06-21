@@ -8,9 +8,9 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260603073049-dd8c9b1a64c2
 	github.com/konflux-ci/image-controller v0.0.0-20260529185104-b31f86d8dce9
 	github.com/konflux-ci/integration-service v0.0.0-20260615074849-8f9e64f5e138
-	github.com/konflux-ci/release-service v0.0.0-20260612080155-c9a576f00b80
+	github.com/konflux-ci/release-service v0.0.0-20260618180947-a971d3c8d10d
 	github.com/onsi/ginkgo/v2 v2.31.0
-	github.com/onsi/gomega v1.41.0
+	github.com/onsi/gomega v1.42.0
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v11.0.0+incompatible
