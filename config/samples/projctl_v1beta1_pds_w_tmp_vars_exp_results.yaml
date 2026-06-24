@@ -70,6 +70,8 @@ spec:
   build-nudges-ref:
   - "cool-comp2-1-0-0"
   - "other-comp"
+  actions:
+    create-pipeline-configuration-pr: {}
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component

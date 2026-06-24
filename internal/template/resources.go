@@ -83,6 +83,7 @@ var supportedResourceTypes = []struct {
 		},
 		createOnlyFields: [][]string{
 			{"metadata", "annotations", "build.appstudio.openshift.io/request"},
+			{"spec", "actions"},
 		},
 		ownerNameField: []string{"spec", "application"},
 		ownerAPI: apischema.GroupVersionKind{

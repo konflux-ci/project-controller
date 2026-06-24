@@ -29,6 +29,8 @@ spec:
     spec:
       application: "cool-app-{{.versionName}}"
       componentName: "cool-comp1-{{.versionName}}"
+      actions:
+        create-pipeline-configuration-pr: {}
       source:
         git:
           context: "./"
