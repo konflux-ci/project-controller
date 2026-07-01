@@ -161,17 +161,23 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, logger logr.Logger, resource *unstructured.Unstructured) bool {
-	if template.HasCreateOnlyFields(resource) {
-		exists, err := r.resourceExists(ctx, resource)
-		if err != nil {
-			logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
-			return true
-		}
-		if exists {
-			template.RemoveCreateOnlyFields(resource)
-		}
+	// Check if resource exists and remove createOnlyFields if it does
+	exists, err := r.resourceExists(ctx, resource)
+	if err != nil {
+		logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
+		return true
 	}
-	err := r.Patch(
+
+	if exists && template.HasCreateOnlyFields(resource) {
+		template.RemoveCreateOnlyFields(resource)
+	}
+
+	// Apply the resource using Server-Side Apply with ForceOwnership.
+	// Note: ImageRepository's update-component-image annotation is a templateable field,
+	// so it will be applied on every reconcile. This creates minor reconciliation churn
+	// when image-controller removes the annotation after processing, but ensures the
+	// annotation is not removed prematurely (before image-controller can act).
+	err = r.Patch(
 		ctx,
 		resource,
 		client.Apply, //nolint:staticcheck // deprecated: will be migrated to new Apply API in future
