@@ -296,3 +296,76 @@ func dropTimestamps(obj *unstructured.Unstructured) {
 func keepNamespaces() bool {
 	return strings.ToLower(os.Getenv("KEEP_TEST_NAMESPACES")) == "true"
 }
+
+var _ = Describe("ImageRepository annotation persistence", func() {
+	Context("When reconciling a PDS with ImageRepository", func() {
+		var (
+			ctx        context.Context
+			testNs     string
+			testNsN    types.NamespacedName
+			reconciler *ProjectDevelopmentStreamReconciler
+		)
+
+		BeforeEach(func() {
+			ctx = context.Background()
+			testNs = setupTestNamespace(ctx, k8sClient)
+			testNsN = types.NamespacedName{
+				Namespace: testNs,
+				Name:      "pds-sample-w-imagerepo",
+			}
+
+			// Apply test resources
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_pdst_w_imagerepo.yaml", testNs)
+			applySampleFile(ctx, k8sClient, "projctl_v1beta1_pds_w_imagerepo.yaml", testNs)
+
+			reconciler = &ProjectDevelopmentStreamReconciler{
+				Client:   saClient,
+				Scheme:   saClient.Scheme(),
+				Recorder: saCluster.GetEventRecorder("ProjectDevelopmentStream-controller-tests"),
+			}
+		})
+
+		It("should preserve image-controller annotation across reconciliations", func() {
+			// First reconcile: Set owner reference
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Second reconcile: Create resources including ImageRepository with annotation
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify ImageRepository was created with the annotation
+			imageRepoName := types.NamespacedName{
+				Namespace: testNs,
+				Name:      "cool-comp1-repo-2-2-0",
+			}
+			imageRepo := &unstructured.Unstructured{}
+			imageRepo.SetAPIVersion("appstudio.redhat.com/v1alpha1")
+			imageRepo.SetKind("ImageRepository")
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			// The annotation should be present after initial creation
+			annotations := imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(BeNil())
+			updateAnnotation := "image-controller.appstudio.redhat.com/update-component-image"
+			Expect(annotations).To(HaveKey(updateAnnotation))
+			Expect(annotations[updateAnnotation]).To(Equal("true"))
+
+			// Third reconcile: annotation should still be present
+			// (not removed by project-controller like it was with createOnlyFields)
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify the annotation persists
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(BeNil())
+			Expect(annotations).To(HaveKey(updateAnnotation),
+				"image-controller annotation should persist across project-controller reconciliations")
+			Expect(annotations[updateAnnotation]).To(Equal("true"))
+		})
+	})
+})

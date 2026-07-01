@@ -100,8 +100,6 @@ var supportedResourceTypes = []struct {
 		},
 		templateAbleFields: [][]string{
 			{"spec", "image", "name"},
-		},
-		createOnlyFields: [][]string{
 			{"metadata", "annotations", "image-controller.appstudio.redhat.com/update-component-image"},
 		},
 		ownerNameField: []string{"metadata", "labels", "appstudio.redhat.com/component"},

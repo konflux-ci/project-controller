@@ -58,6 +58,8 @@ metadata:
   labels:
     appstudio.redhat.com/component: "cool-comp1-2-2-0"
     appstudio.redhat.com/application: "cool-app-2-2-0"
+  annotations:
+    image-controller.appstudio.redhat.com/update-component-image: "true"
   ownerReferences:
   - apiVersion: "appstudio.redhat.com/v1alpha1"
     kind: "Component"
