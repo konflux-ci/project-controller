@@ -40,6 +40,8 @@ spec:
       labels:
         appstudio.redhat.com/component: "cool-comp1-{{.versionName}}"
         appstudio.redhat.com/application: "cool-app-{{.versionName}}"
+      annotations:
+        image-controller.appstudio.redhat.com/update-component-image: "true"
     spec:
       image:
         visibility: public

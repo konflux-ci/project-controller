@@ -43,6 +43,8 @@ import (
 const (
 	// ConditionTypeReady represents the Ready condition type
 	ConditionTypeReady = "Ready"
+	// ImageControllerUpdateAnnotation is the annotation that signals image-controller to update Component.spec.containerImage
+	ImageControllerUpdateAnnotation = "image-controller.appstudio.redhat.com/update-component-image"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
@@ -161,17 +163,55 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, logger logr.Logger, resource *unstructured.Unstructured) bool {
-	if template.HasCreateOnlyFields(resource) {
-		exists, err := r.resourceExists(ctx, resource)
-		if err != nil {
-			logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
-			return true
-		}
-		if exists {
-			template.RemoveCreateOnlyFields(resource)
-		}
+	// Check if resource exists and remove createOnlyFields if it does
+	exists, err := r.resourceExists(ctx, resource)
+	if err != nil {
+		logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
+		return true
 	}
-	err := r.Patch(
+
+	if exists && template.HasCreateOnlyFields(resource) {
+		template.RemoveCreateOnlyFields(resource)
+	}
+
+	// Special handling for ImageRepository: check if the live resource has the annotation.
+	// If the ImageRepository exists and doesn't have the annotation, don't re-apply it
+	// (image-controller already processed it). This prevents reconciliation churn.
+	if resource.GetKind() == "ImageRepository" && resource.GetAPIVersion() == "appstudio.redhat.com/v1alpha1" && exists {
+		// Get the live ImageRepository to check its current state
+		liveImageRepo := &unstructured.Unstructured{}
+		liveImageRepo.SetAPIVersion(resource.GetAPIVersion())
+		liveImageRepo.SetKind(resource.GetKind())
+
+		err := r.Get(ctx, client.ObjectKey{
+			Namespace: resource.GetNamespace(),
+			Name:      resource.GetName(),
+		}, liveImageRepo)
+
+		if err == nil {
+			liveAnnotations := liveImageRepo.GetAnnotations()
+
+			// If the live resource doesn't have the annotation, remove it from our desired state
+			// (image-controller has already processed this ImageRepository)
+			if liveAnnotations == nil || liveAnnotations[ImageControllerUpdateAnnotation] == "" {
+				annotations := resource.GetAnnotations()
+				if annotations != nil {
+					delete(annotations, ImageControllerUpdateAnnotation)
+					if len(annotations) == 0 {
+						resource.SetAnnotations(nil)
+					} else {
+						resource.SetAnnotations(annotations)
+					}
+					logger.V(1).Info("Skipping image-controller annotation (already processed by image-controller)",
+						"ImageRepository", resource.GetName())
+				}
+			}
+		}
+		// If we can't get the live resource, proceed with applying as-is (shouldn't happen since exists=true)
+	}
+
+	// Apply the resource using Server-Side Apply with ForceOwnership.
+	err = r.Patch(
 		ctx,
 		resource,
 		client.Apply, //nolint:staticcheck // deprecated: will be migrated to new Apply API in future
