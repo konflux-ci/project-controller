@@ -37,6 +37,11 @@ var supportedResourceTypes = []struct {
 	untouchableFields [][]string
 	// Fields that should be set only if creating new resources
 	createOnlyFields [][]string
+	// Fields that should only be included in the desired state if they exist in the live resource.
+	// This is used for fields that signal one-time processing by another controller.
+	// The field will be applied on creation, but on updates it will only be included if present
+	// in the live resource (preventing re-application after another controller removes it).
+	liveStateConditionalFields [][]string
 	// A field of the resource that points to its owner object. If nil, an
 	// owner record would not be set.
 	ownerNameField []string
@@ -100,6 +105,9 @@ var supportedResourceTypes = []struct {
 		},
 		templateAbleFields: [][]string{
 			{"spec", "image", "name"},
+			{"metadata", "annotations", "image-controller.appstudio.redhat.com/update-component-image"},
+		},
+		liveStateConditionalFields: [][]string{
 			{"metadata", "annotations", "image-controller.appstudio.redhat.com/update-component-image"},
 		},
 		ownerNameField: []string{"metadata", "labels", "appstudio.redhat.com/component"},
@@ -340,4 +348,15 @@ func RemoveCreateOnlyFields(resource *unstructured.Unstructured) {
 			return
 		}
 	}
+}
+
+// GetLiveStateConditionalFields returns the list of fields that should only be included
+// if they exist in the live resource. Returns nil if the resource type doesn't have any.
+func GetLiveStateConditionalFields(resource *unstructured.Unstructured) [][]string {
+	for _, srt := range supportedResourceTypes {
+		if findGVK(srt.supportedAPIs, resource.GroupVersionKind()) {
+			return srt.liveStateConditionalFields
+		}
+	}
+	return nil
 }
