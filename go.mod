@@ -141,13 +141,13 @@ require (
 	k8s.io/apiserver v0.36.2 // indirect
 	k8s.io/component-base v0.36.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20260624041617-8f3fa4921821 // indirect
+	k8s.io/kube-openapi v0.0.0-20260706235625-cdb1db5517a0 // indirect
 	k8s.io/streaming v0.36.2 // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd // indirect
 	knative.dev/pkg v0.0.0-20260622140654-39ebae2ee2dc // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.36.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.4.1 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
