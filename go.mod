@@ -1,6 +1,6 @@
 module github.com/konflux-ci/project-controller
 
-go 1.26.0
+go 1.26.4
 
 require (
 	github.com/gertd/go-pluralize v0.2.1
@@ -96,7 +96,7 @@ require (
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/tektoncd/pipeline v1.13.1 // indirect
+	github.com/tektoncd/pipeline v1.14.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
