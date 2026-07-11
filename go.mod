@@ -20,7 +20,7 @@ require (
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
 replace k8s.io/client-go => k8s.io/client-go v0.36.2
 
-replace github.com/google/cel-go => github.com/google/cel-go v0.29.1
+replace github.com/google/cel-go => github.com/google/cel-go v0.29.2
 
 // Pin knative.dev/pkg to avoid breaking changes with newer versions.
 // Knative migrated to OpenTelemetry.
@@ -67,7 +67,7 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.27.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
-	github.com/google/cel-go v0.29.1 // indirect
+	github.com/google/cel-go v0.29.2 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20260604005048-7023385849c0 // indirect
