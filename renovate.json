@@ -54,16 +54,9 @@
       ]
     },
     {
-      "description": "Disable major version updates for indirect Go dependencies since they are resolved by go mod tidy based on direct dependency requirements",
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchDepTypes": [
-        "indirect"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "description": "Disable Renovate updates for indirect Go dependencies since they are resolved by go mod tidy based on direct dependency requirements",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
       "enabled": false
     },
     {
