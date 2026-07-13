@@ -470,5 +470,193 @@ var _ = Describe("ImageRepository annotation persistence", func() {
 				"annotation MUST be present even though Component already has containerImage from template")
 			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal("true"))
 		})
+
+		It("should treat empty-string annotation as removed by image-controller", func() {
+			// Test case 1 from Yftach: empty-string annotation should be treated the same as absent.
+			// If image-controller sets update-component-image: "" instead of deleting it,
+			// project-controller should NOT re-apply it from the template.
+
+			// First reconcile: Set owner reference
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Second reconcile: Create resources including ImageRepository with annotation
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify ImageRepository was created
+			imageRepoName := types.NamespacedName{
+				Namespace: testNs,
+				Name:      "cool-comp1-repo-2-2-0",
+			}
+			imageRepo := &unstructured.Unstructured{}
+			imageRepo.SetAPIVersion("appstudio.redhat.com/v1alpha1")
+			imageRepo.SetKind("ImageRepository")
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Simulate image-controller setting the annotation to empty string instead of deleting it
+			annotations := imageRepo.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]string)
+			}
+			annotations[ImageControllerUpdateAnnotation] = ""
+			imageRepo.SetAnnotations(annotations)
+			err = k8sClient.Update(ctx, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify annotation is now empty string
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal(""),
+				"annotation should be set to empty string to simulate image-controller behavior variant")
+
+			// Third reconcile: project-controller should NOT restore the annotation to "true"
+			// because empty string is treated as "processed" (same as absent)
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify the annotation is still empty (not restored to "true")
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal(""),
+				"project-controller should NOT change empty-string annotation back to 'true'")
+		})
+
+		It("should NOT restore annotation after premature loss before image-controller processes it", func() {
+			// Test case 2 from Yftach: if the annotation is lost (deleted by an external actor or bug)
+			// before image-controller processes it, project-controller should NOT restore it.
+			// This documents the current no-self-heal behavior and prevents accidental churn reintroduction.
+
+			// First reconcile: Set owner reference
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Second reconcile: Create resources including ImageRepository with annotation
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify ImageRepository was created with the annotation
+			imageRepoName := types.NamespacedName{
+				Namespace: testNs,
+				Name:      "cool-comp1-repo-2-2-0",
+			}
+			imageRepo := &unstructured.Unstructured{}
+			imageRepo.SetAPIVersion("appstudio.redhat.com/v1alpha1")
+			imageRepo.SetKind("ImageRepository")
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			annotations := imageRepo.GetAnnotations()
+			Expect(annotations).To(HaveKey(ImageControllerUpdateAnnotation))
+			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal("true"))
+
+			// Simulate premature annotation loss (e.g., external actor, bug, or race)
+			// This happens BEFORE image-controller has a chance to process it
+			delete(annotations, ImageControllerUpdateAnnotation)
+			imageRepo.SetAnnotations(annotations)
+			err = k8sClient.Update(ctx, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify annotation was removed
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(HaveKey(ImageControllerUpdateAnnotation),
+				"annotation should be absent to simulate premature loss")
+
+			// Third reconcile: project-controller should NOT restore the annotation
+			// This is the documented behavior: no self-healing to avoid churn
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify the annotation is still absent (not restored from template)
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(HaveKey(ImageControllerUpdateAnnotation),
+				"project-controller should NOT restore annotation after premature loss (no self-heal)")
+		})
+
+		It("should handle full bootstrap lifecycle with sequential reconciles", func() {
+			// Test case 4 from Yftach (optional): end-to-end bootstrap sequence
+			// This consolidates the happy path into a single spec to catch regressions
+			// where one step breaks in isolation.
+
+			imageRepoName := types.NamespacedName{
+				Namespace: testNs,
+				Name:      "cool-comp1-repo-2-2-0",
+			}
+
+			// Step 1: First reconcile - Set owner reference
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Step 2: Second reconcile - Create ImageRepository with annotation
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify: ImageRepository created with annotation
+			imageRepo := &unstructured.Unstructured{}
+			imageRepo.SetAPIVersion("appstudio.redhat.com/v1alpha1")
+			imageRepo.SetKind("ImageRepository")
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations := imageRepo.GetAnnotations()
+			Expect(annotations).To(HaveKey(ImageControllerUpdateAnnotation))
+			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal("true"),
+				"annotation should be present after bootstrap")
+
+			// Step 3: Third reconcile - Annotation still present (image-controller hasn't processed yet)
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify: Annotation preserved across reconciles
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).To(HaveKey(ImageControllerUpdateAnnotation))
+			Expect(annotations[ImageControllerUpdateAnnotation]).To(Equal("true"),
+				"annotation should persist while image-controller hasn't acted")
+
+			// Step 4: Simulate image-controller completion (remove annotation, set containerImage on Component)
+			delete(annotations, ImageControllerUpdateAnnotation)
+			imageRepo.SetAnnotations(annotations)
+			err = k8sClient.Update(ctx, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Also update Component to simulate full image-controller workflow
+			component := &unstructured.Unstructured{}
+			component.SetAPIVersion("appstudio.redhat.com/v1alpha1")
+			component.SetKind("Component")
+			err = k8sClient.Get(ctx, types.NamespacedName{
+				Namespace: testNs,
+				Name:      "cool-comp1-2-2-0",
+			}, component)
+			if err == nil {
+				_ = unstructured.SetNestedField(component.Object, "quay.io/konflux/cool-comp1:latest", "spec", "containerImage")
+				_ = k8sClient.Update(ctx, component)
+			}
+
+			// Verify: Annotation removed
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(HaveKey(ImageControllerUpdateAnnotation),
+				"annotation should be absent after image-controller processing")
+
+			// Step 5: Fourth reconcile - Should NOT restore annotation
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: testNsN})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Final verification: Annotation stays absent
+			err = k8sClient.Get(ctx, imageRepoName, imageRepo)
+			Expect(err).NotTo(HaveOccurred())
+			annotations = imageRepo.GetAnnotations()
+			Expect(annotations).NotTo(HaveKey(ImageControllerUpdateAnnotation),
+				"annotation should NOT be restored after image-controller completes")
+		})
 	})
 })
