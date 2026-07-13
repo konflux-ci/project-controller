@@ -43,6 +43,8 @@ import (
 const (
 	// ConditionTypeReady represents the Ready condition type
 	ConditionTypeReady = "Ready"
+	// ImageControllerUpdateAnnotation is the annotation that signals image-controller to update Component.spec.containerImage
+	ImageControllerUpdateAnnotation = "image-controller.appstudio.redhat.com/update-component-image"
 )
 
 // ProjectDevelopmentStreamReconciler reconciles a ProjectDevelopmentStream object
@@ -161,16 +163,68 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 // conflict for the resource and therefore the reconcile action should be
 // re-queued.
 func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, logger logr.Logger, resource *unstructured.Unstructured) bool {
-	if template.HasCreateOnlyFields(resource) {
-		exists, err := r.resourceExists(ctx, resource)
+	// Only check if resource exists if we need to handle createOnlyFields or liveStateConditionalFields
+	needsExistenceCheck := template.HasCreateOnlyFields(resource) ||
+		len(template.GetLiveStateConditionalFields(resource)) > 0
+
+	var exists bool
+	if needsExistenceCheck {
+		var err error
+		exists, err = r.resourceExists(ctx, resource)
 		if err != nil {
 			logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
 			return true
 		}
-		if exists {
-			template.RemoveCreateOnlyFields(resource)
+	}
+
+	if exists && template.HasCreateOnlyFields(resource) {
+		template.RemoveCreateOnlyFields(resource)
+	}
+
+	// Handle live-state conditional fields: fields that should only be included in the desired state
+	// if they exist in the live resource. This is used for fields that signal one-time processing
+	// by another controller (e.g., annotations that are removed after processing).
+	if exists {
+		conditionalFields := template.GetLiveStateConditionalFields(resource)
+		if len(conditionalFields) > 0 {
+			// Get the live resource to check its current state
+			liveResource := &unstructured.Unstructured{}
+			liveResource.SetAPIVersion(resource.GetAPIVersion())
+			liveResource.SetKind(resource.GetKind())
+
+			err := r.Get(ctx, client.ObjectKey{
+				Namespace: resource.GetNamespace(),
+				Name:      resource.GetName(),
+			}, liveResource)
+
+			if err == nil {
+				// For each conditional field, check if it exists in the live resource
+				for _, fieldPath := range conditionalFields {
+					value, existsInLive, _ := unstructured.NestedFieldNoCopy(liveResource.Object, fieldPath...)
+					// Remove field if it doesn't exist OR if it's an empty string
+					// (matching original behavior for annotations that may be set to "")
+					if !existsInLive || (value != nil && value == "") {
+						// Field doesn't exist or is empty in live resource, remove it from desired state
+						unstructured.RemoveNestedField(resource.Object, fieldPath...)
+						logger.V(1).Info("Removing live-state conditional field (not present or empty in live resource)",
+							"kind", resource.GetKind(), "name", resource.GetName(), "field", fieldPath)
+					}
+				}
+
+				// Clean up empty annotation maps if all annotations were removed
+				// This matches the original behavior and keeps resources clean
+				if len(conditionalFields) > 0 {
+					annotations := resource.GetAnnotations()
+					if annotations != nil && len(annotations) == 0 {
+						resource.SetAnnotations(nil)
+					}
+				}
+			}
+			// If we can't get the live resource, proceed with applying as-is (shouldn't happen since exists=true)
 		}
 	}
+
+	// Apply the resource using Server-Side Apply with ForceOwnership.
 	err := r.Patch(
 		ctx,
 		resource,

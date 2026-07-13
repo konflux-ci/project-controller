@@ -37,6 +37,7 @@ literals leak into created CRs.
 | Free-form string (URLs, image refs, descriptions, paths with `/`) | `templateAbleFields` | None |
 | Must never be controller-managed | `untouchableFields` | Stripped before apply |
 | Set only on create | `createOnlyFields` | Stripped on update |
+| One-time cross-controller signal | `liveStateConditionalFields` | Conditionally included based on live state |
 
 **Pitfall:** `spec.image.name` on ImageRepository is `templateAbleFields`, not name
 fields — it may contain `/`.
@@ -57,7 +58,7 @@ Copy and track:
 
 ```
 - [ ] 1. Confirm field path and resource kind
-- [ ] 2. Pick category (name vs general vs untouchable vs createOnly)
+- [ ] 2. Pick category (name vs general vs untouchable vs createOnly vs liveStateConditional)
 - [ ] 3. Add path to supportedResourceTypes in resources.go
 - [ ] 4. Update config/samples fixtures
 - [ ] 5. Run make test (required)
