@@ -42,6 +42,63 @@ literals leak into created CRs.
 **Pitfall:** `spec.image.name` on ImageRepository is `templateAbleFields`, not name
 fields — it may contain `/`.
 
+### Field category details
+
+#### `liveStateConditionalFields` semantics
+
+Fields in `liveStateConditionalFields` are included in the SSA desired state
+when a resource is **created**, but on **updates** the reconciler inspects the
+live resource first: the field is only included in the desired state if it is
+still present and non-empty in the live resource. If the field is absent or
+empty in the live resource, it is removed from the desired state before the
+SSA patch is applied.
+
+This prevents the reconciler from re-applying a field that an external
+controller has already processed and removed. Without this category, the
+reconciler's SSA patch would re-add the field on every reconcile, undoing
+the external controller's work.
+
+A field listed in `liveStateConditionalFields` must **also** appear in
+`templateAbleFields` (or `templateAbleNameFields`) so that template
+substitution is applied to it. The `liveStateConditionalFields` list only
+controls inclusion in the desired state — it does not trigger template
+processing on its own.
+
+#### Decision guide — `liveStateConditionalFields` vs `createOnlyFields`
+
+| Criterion | `createOnlyFields` | `liveStateConditionalFields` |
+|-----------|-------------------|------------------------------|
+| **When included in SSA patch** | Only on resource creation | On creation always; on update only if present and non-empty in live resource |
+| **On subsequent reconciles** | Stripped from desired state unconditionally | Stripped only if absent or empty in live resource |
+| **Use when** | Field is fire-and-forget — set once, never managed again by this controller | Field must persist across reconciles until an external controller processes and removes it |
+| **Risk if wrong category** | External controller never sees the field (removed too early by SSA) | Field re-appears after external controller removes it (SSA re-adds it) |
+
+Use **`createOnlyFields`** when the annotation triggers a one-time action and
+the reconciler should never re-apply it — even if the external controller has
+not yet processed it. Example: `build.appstudio.openshift.io/request` on
+Component tells build-service to submit an initial build. Once the resource
+exists, the reconciler strips this field from all future SSA patches.
+
+Use **`liveStateConditionalFields`** when the annotation must survive
+multiple reconcile cycles until the external controller processes and removes
+it. The reconciler keeps including the field as long as the live resource
+still has it, and stops only after the external controller clears it.
+Example: `image-controller.appstudio.redhat.com/update-component-image` on
+ImageRepository tells image-controller to set `spec.image.name` on the
+associated Component. Image-controller removes the annotation once
+provisioning completes; only then does the reconciler stop including it.
+
+#### Cross-controller annotation lifecycle
+
+Two annotations currently use these field categories. Changes to their
+category affect cross-controller contracts — do not reclassify without
+coordinating with the owning controller's team.
+
+| Annotation | Resource | Category | External controller | Lifecycle |
+|-----------|----------|----------|--------------------|----|
+| `image-controller.appstudio.redhat.com/update-component-image` | ImageRepository | `liveStateConditionalFields` | image-controller | Applied on creation. Image-controller reads it, sets `spec.image.name` on the Component, then removes the annotation. Reconciler keeps including it until image-controller removes it. |
+| `build.appstudio.openshift.io/request` | Component | `createOnlyFields` | build-service | Applied on creation only. Build-service reads it to trigger an initial build pipeline. Reconciler never re-applies it on subsequent reconciles. |
+
 ## Path syntax
 
 | `"[]"` position | Meaning | Example |
