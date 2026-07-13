@@ -18,6 +18,15 @@
   ],
   "automergeStrategy": "merge-commit",
   "platformAutomerge": true,
+  "gomod": {
+    "packageRules": [
+      {
+        "description": "Disable Renovate updates for indirect Go dependencies since they are resolved by go mod tidy based on direct dependency requirements",
+        "matchDepTypes": ["indirect"],
+        "enabled": false
+      }
+    ]
+  },
   "packageRules": [
     {
       "description": "Auto-merge patch updates for Konflux components",
@@ -52,12 +61,6 @@
         "/registry.access.redhat.com//",
         "/registry.fedoraproject.org//"
       ]
-    },
-    {
-      "description": "Disable Renovate updates for indirect Go dependencies since they are resolved by go mod tidy based on direct dependency requirements",
-      "matchManagers": ["gomod"],
-      "matchDepTypes": ["indirect"],
-      "enabled": false
     },
     {
       "description": "Auto-merge non-major Go module updates",
