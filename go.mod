@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/gertd/go-pluralize v0.2.1
-	github.com/go-logr/logr v1.4.3
+	github.com/go-logr/logr v1.4.4
 	github.com/konflux-ci/application-api v0.0.0-20260603073049-dd8c9b1a64c2
 	github.com/konflux-ci/image-controller v0.0.0-20260707130333-455617736338
 	github.com/konflux-ci/integration-service v0.0.0-20260715084900-d10caf72bd76
