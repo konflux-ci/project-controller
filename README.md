@@ -29,6 +29,11 @@ flowchart TD
     CT -..->|generates| C
 ```
 
+## Installation
+
+Local Kind/Konflux (`make install`, `make run` / `make deploy`): [skills/local-dev-setup/SKILL.md](skills/local-dev-setup/SKILL.md).
+CRC: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Using this controller
 
 ### Create a project
