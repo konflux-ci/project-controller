@@ -20,6 +20,21 @@ make manifests      # regenerate CRDs + RBAC after changing kubebuilder markers
 make generate       # regenerate deepcopy after changing api/v1beta1/ types
 ```
 
+## Single-file verification
+
+After a small Go change, lint and vet the **package you edited** (not the whole repo).
+
+1. Read the pinned golangci-lint version from `.golangci-lint-version`.
+2. If `bin/` has no `golangci-lint-<that version>` binary, run `make golangci-lint`.
+3. Run `./bin/golangci-lint-<version> run <package-dir>/` and `go vet <package-dir>/`.
+
+Example (replace the package path with the one you changed):
+
+```bash
+./bin/golangci-lint run ./internal/controller/
+go vet ./internal/controller/
+```
+
 ## Key Files
 
 | Purpose | Path |
