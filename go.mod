@@ -20,8 +20,6 @@ require (
 // Without this replace, go report 'package k8s.io/client-go/XXXX provided by k8s.io/client-go at latest version v0.30.1 but not at required version v1.5.2'
 replace k8s.io/client-go => k8s.io/client-go v0.37.0
 
-replace github.com/google/cel-go => github.com/google/cel-go v0.31.0
-
 // Pin knative.dev/pkg to avoid breaking changes with newer versions.
 // Knative migrated to OpenTelemetry.
 // knative.dev/pkg/metrics is required by Tekton but not available anymore.
