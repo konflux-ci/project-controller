@@ -133,7 +133,6 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, nil
 	}
 
-	var requeue bool
 	for _, resource := range resources {
 		resLogger := logger.WithValues(
 			"apiVersion", resource.GetAPIVersion(),
@@ -146,23 +145,20 @@ func (r *ProjectDevelopmentStreamReconciler) Reconcile(ctx context.Context, req 
 			// If the resource does not have an owner set, use the PDS
 			_ = controllerutil.SetOwnerReference(&pds, resource, r.Scheme)
 		}
-		requeue = requeue || r.createOrUpdateResource(ctx, resLogger, resource)
+		if err := r.createOrUpdateResource(ctx, resLogger, resource); err != nil {
+			_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "ApplyingResources", "Resource apply failed, retrying")
+			return ctrl.Result{}, err
+		}
 	}
 
-	// Set final condition based on whether we need to requeue
-	if requeue {
-		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionUnknown, "ApplyingResources", "Resource conflicts detected, retrying")
-	} else {
-		_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "ResourcesApplied", "All resources applied successfully")
-	}
+	_ = r.setReadyCondition(ctx, &pds, metav1.ConditionTrue, "ResourcesApplied", "All resources applied successfully")
 
-	return ctrl.Result{Requeue: requeue}, nil
+	return ctrl.Result{}, nil
 }
 
-// Create or update the given resource. Returns true if there is an update
-// conflict for the resource and therefore the reconcile action should be
-// re-queued.
-func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, logger logr.Logger, resource *unstructured.Unstructured) bool {
+// Create or update the given resource. Errors are returned so the controller
+// can retry them using its rate-limited exponential backoff.
+func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.Context, logger logr.Logger, resource *unstructured.Unstructured) error {
 	// Only check if resource exists if we need to handle createOnlyFields or liveStateConditionalFields
 	needsExistenceCheck := template.HasCreateOnlyFields(resource) ||
 		len(template.GetLiveStateConditionalFields(resource)) > 0
@@ -173,7 +169,7 @@ func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.
 		exists, err = r.resourceExists(ctx, resource)
 		if err != nil {
 			logger.Error(err, "Failed to check if resource exists", "name", resource.GetName(), "kind", resource.GetKind())
-			return true
+			return err
 		}
 	}
 
@@ -234,10 +230,10 @@ func (r *ProjectDevelopmentStreamReconciler) createOrUpdateResource(ctx context.
 	)
 	if err != nil {
 		logger.Error(err, fmt.Sprintf("Failed to create or update resource: %s [%s]", resource.GetName(), resource.GetKind()))
-		return apierrors.IsConflict(err)
+		return err
 	}
 	logger.Info(fmt.Sprintf("Resource updated: %s [%s]", resource.GetName(), resource.GetKind()))
-	return false
+	return nil
 }
 
 // Check wither the PDS ownerReference is already set to point to the right

@@ -30,6 +30,7 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -157,8 +158,49 @@ var _ = Describe("ProjectDevelopmentStream Controller", func() {
 		),
 		// Note: The following status reasons are NOT tested:
 		// - "Reconciling": Too transient, immediately overwritten by subsequent conditions
-		// - "ApplyingResources": Requires reliable resource conflict simulation, difficult to test without flakiness
 	)
+})
+
+type applyErrorClient struct {
+	client.Client
+	err        error
+	patchCalls int
+}
+
+func (c *applyErrorClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+	c.patchCalls++
+	return c.err
+}
+
+var _ = Describe("resource apply failures", func() {
+	It("returns the apply error and stops after the first failed resource", func() {
+		ctx := context.Background()
+		testNs := setupTestNamespace(ctx, k8sClient)
+		applySampleFile(ctx, k8sClient, "projctl_v1beta1_project.yaml", testNs)
+		applySampleFile(ctx, k8sClient, "projctl_v1beta1_projectdevelopmentstreamtemplate.yaml", testNs)
+		applySampleFile(ctx, k8sClient, "projctl_v1beta1_projectdevelopmentstream_w_template_vars.yaml", testNs)
+
+		applyErr := errors.NewConflict(schema.GroupResource{Group: "appstudio.redhat.com", Resource: "components"}, "component", fmt.Errorf("apply conflict"))
+		failingClient := &applyErrorClient{Client: saClient, err: applyErr}
+		reconciler := &ProjectDevelopmentStreamReconciler{
+			Client:   failingClient,
+			Scheme:   saClient.Scheme(),
+			Recorder: saCluster.GetEventRecorder("ProjectDevelopmentStream-controller-tests"),
+		}
+		pdsName := types.NamespacedName{Namespace: testNs, Name: "projectdevelopmentstream-sample-w-template-vars"}
+
+		_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pdsName})
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pdsName})
+		Expect(err).To(MatchError(applyErr))
+		Expect(failingClient.patchCalls).To(Equal(1))
+
+		condition := getPDS(ctx, k8sClient, pdsName).Status.Conditions[0]
+		Expect(condition.Type).To(Equal(ConditionTypeReady))
+		Expect(condition.Status).To(Equal(metav1.ConditionUnknown))
+		Expect(condition.Reason).To(Equal("ApplyingResources"))
+	})
 })
 
 var _ = Describe("checkProductOwnerRef", func() {
