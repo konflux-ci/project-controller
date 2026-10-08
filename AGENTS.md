@@ -71,6 +71,7 @@ Detailed guides live in `skills/` — each subdirectory contains a `SKILL.md` wi
 |-------|----------|
 | [add-template-field](skills/add-template-field/SKILL.md) | Parametrizing CR fields in PDST templates, editing `templateAbleFields` / `templateAbleNameFields`, or template substitution test fixtures |
 | [local-dev-setup](skills/local-dev-setup/SKILL.md) | Running project-controller on local Konflux (Kind), E2E template verification, `make run` / `make deploy` against `kind-konflux` |
+| [retro-filing-policy](skills/retro-filing-policy/SKILL.md) | Retro output (PR close or `/fs-retro`). Keep `proposals` empty unless the human comment explicitly says to file issues. |
 
 ## Rules
 
