@@ -184,3 +184,5 @@ likely to be resolved in the future.
   *ProjectDevelopmentStream* object. The events can be seen by running the
    `kubectl describe` or `oc describe` commands on the
   *ProjectDevelopmentStream* resource.
+
+<!-- Temporary change for Fullsend manual-trigger verification (KFLUXVNGD-1440). Safe to close. -->
