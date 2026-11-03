@@ -8,7 +8,7 @@ require (
 	github.com/konflux-ci/application-api v0.0.0-20260927062134-a189c1676a85
 	github.com/konflux-ci/image-controller v0.0.0-20261007141849-30cb352ef6d2
 	github.com/konflux-ci/integration-service v0.0.0-20261029165049-252be6df555b
-	github.com/konflux-ci/release-service v0.0.0-20261021064410-e55c5282b48c
+	github.com/konflux-ci/release-service v0.0.0-20261030152513-5c67a2aa1153
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
 	k8s.io/api v0.37.2
@@ -138,9 +138,9 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	k8s.io/apiextensions-apiserver v0.37.0 // indirect
-	k8s.io/apiserver v0.37.0 // indirect
-	k8s.io/component-base v0.37.0 // indirect
+	k8s.io/apiextensions-apiserver v0.37.1 // indirect
+	k8s.io/apiserver v0.37.1 // indirect
+	k8s.io/component-base v0.37.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/streaming v0.37.2 // indirect
