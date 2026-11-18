@@ -25,7 +25,7 @@ replace github.com/google/cel-go => github.com/google/cel-go v0.31.0
 // Pin knative.dev/pkg to avoid breaking changes with newer versions.
 // Knative migrated to OpenTelemetry.
 // knative.dev/pkg/metrics is required by Tekton but not available anymore.
-replace knative.dev/pkg => knative.dev/pkg v0.0.0-20261106011441-a8ce7f3f6f84
+replace knative.dev/pkg => knative.dev/pkg v0.0.0-20261110182720-ae1437a8b141
 
 require (
 	cel.dev/expr v0.25.3 // indirect
@@ -95,7 +95,7 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.3 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/tektoncd/pipeline v1.13.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
